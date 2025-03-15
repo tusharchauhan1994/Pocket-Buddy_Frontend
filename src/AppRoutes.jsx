@@ -56,8 +56,8 @@ const AppRoutes = () => {
 
         {/* Restaurant Routes */}
         <Route path="/restaurant/dashboard" element={<RestaurantDashboard />} />
-        <Route path="/restaurant/addoffer" element={<AddOffer />} />
-        <Route path="/restaurant/AddRestaurant" element={<AddRestaurant />} />
+        <Route path="/restaurant/addOffer" element={<AddOffer />} />
+        <Route path="/restaurant/addRestaurant" element={<AddRestaurant />} />
         <Route path="/restaurant/myRestaurant" element={<ViewMyRestaurant />} />
         <Route
           path="/restaurant/updateRestaurant/:id"
