@@ -36,9 +36,12 @@ export const AddRestaurant = () => {
     Object.keys(data).forEach((key) => formData.append(key, data[key]));
     formData.append("image", data.image[0]);
     formData.append("userId", userId);
-
+   
     await axios.post("/location/addWithFile", formData);
     navigate("/restaurant/myRestaurant");
+
+    alert("Restaurant added successfully");
+    console.log(data);
   };
 
   return (

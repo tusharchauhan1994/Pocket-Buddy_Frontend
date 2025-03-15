@@ -8,32 +8,37 @@ export const ViewMyRestaurant = () => {
 
   const getAllMyRestaurants = async () => {
     try {
-      const res = await axios.get(
-        `/location/getLocationByUserId/${localStorage.getItem("id")}`
-      );
-      console.log(res.data);
-      setRestaurants(res.data.data);
+      const userId = localStorage.getItem("id");
+      if (!userId) {
+        console.error("User ID not found in localStorage");
+        return;
+      }
+  
+      const res = await axios.get(`/location/getLocationByUserId/${userId}`);
+      console.log("Full API Response:", res.data); // Log full response
+  
+      if (res.data.success) {
+        console.log("Fetched Restaurants:", res.data.data); // Log only data
+        setRestaurants(res.data.data);
+      } else {
+        console.error("API Error: Response format incorrect", res.data);
+      }
     } catch (error) {
       console.error("Error fetching restaurants:", error);
     }
   };
+  
+  
 
   useEffect(() => {
     getAllMyRestaurants();
   }, []);
 
-  const handleUpdate = (id) => {
-    console.log("Update restaurant with ID:", id);
-  };
-
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar with fixed width */}
       <div className="w-64 flex-shrink-0">
         <RestaurantSidebar />
       </div>
-
-      {/* Main Content - Takes Remaining Space */}
       <div className="flex-grow p-6">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
           My Restaurants
@@ -59,7 +64,7 @@ export const ViewMyRestaurant = () => {
                 {restaurants.length > 0 ? (
                   restaurants.map((restaurant, index) => (
                     <tr
-                      key={index}
+                      key={restaurant._id}
                       className="border-b hover:bg-gray-100 transition-colors"
                     >
                       <td className="p-3 text-gray-700 sticky left-0 bg-white font-semibold">
@@ -82,9 +87,8 @@ export const ViewMyRestaurant = () => {
                         />
                       </td>
                       <td className="p-3">
-                        <Link to={`/updateRestaurant${restaurant._id}`}>
+                        <Link to={`/updateRestaurant/${restaurant._id}`}>
                           <button
-                            onClick={() => handleUpdate(restaurant.id)}
                             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
                           >
                             Edit
