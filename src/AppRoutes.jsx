@@ -23,7 +23,7 @@ import UserReview from "./components/user/UserReview";
 
 // Restaurant Pages
 import { ViewMyRestaurant } from "./components/restaurant/ViewMyRestaurant";
-import UpdateRestaurant from "./components/restaurant/UpdateMyRestaurant";
+import { UpdateMyRestaurant } from "./components/restaurant/UpdateMyRestaurant";
 import AddOffer from "./components/restaurant/AddOffer";
 import { RestaurantDashboard } from "./components/restaurant/RestaurantDashboard";
 import Unauthorized from "./components/pages/Unauthorized";
@@ -61,7 +61,7 @@ const AppRoutes = () => {
         <Route path="/restaurant/myRestaurant" element={<ViewMyRestaurant />} />
         <Route
           path="/restaurant/updateRestaurant/:id"
-          element={<UpdateRestaurant />}
+          element={<UpdateMyRestaurant />}
         />
 
         {/* Admin */}
