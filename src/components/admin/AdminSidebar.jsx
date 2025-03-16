@@ -1,7 +1,25 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Drawer, List, ListItem, ListItemIcon, ListItemText, Button, Divider } from "@mui/material";
-import { Dashboard, Group, Store, LocalOffer, Settings, ExitToApp, Menu, Notifications, Assessment } from "@mui/icons-material";
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Button,
+  Divider,
+} from "@mui/material";
+import {
+  Dashboard,
+  Group,
+  Store,
+  LocalOffer,
+  Settings,
+  ExitToApp,
+  Menu,
+  Notifications,
+  Assessment,
+} from "@mui/icons-material";
 
 export const AdminSidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -24,7 +42,10 @@ export const AdminSidebar = () => {
     <Drawer
       variant="permanent"
       open={isOpen}
-      sx={{ width: isOpen ? 240 : 60, "& .MuiDrawer-paper": { backgroundColor: "#f4f4f4", color: "#333" } }}
+      sx={{
+        width: isOpen ? 240 : 60,
+        "& .MuiDrawer-paper": { backgroundColor: "#f4f4f4", color: "#333" },
+      }}
     >
       <div className="p-4 flex justify-between items-center">
         {isOpen && <h1 className="text-lg font-bold">Admin Panel</h1>}
@@ -44,8 +65,7 @@ export const AdminSidebar = () => {
           { path: "/admin/settings", label: "Settings", icon: <Settings /> },
         ].map((item) => (
           <ListItem
-            button
-            component={Link}
+            component={Link} // ✅ Use `component={Link}` instead of `button`
             to={item.path}
             selected={isActive(item.path)}
             sx={{
@@ -55,7 +75,9 @@ export const AdminSidebar = () => {
             }}
             key={item.path}
           >
-            <ListItemIcon sx={{ color: isActive(item.path) ? "#ffffff" : "#333" }}>{item.icon}</ListItemIcon>
+            <ListItemIcon sx={{ color: isActive(item.path) ? "#ffffff" : "#333" }}>
+              {item.icon}
+            </ListItemIcon>
             {isOpen && <ListItemText primary={item.label} />}
           </ListItem>
         ))}
@@ -63,11 +85,12 @@ export const AdminSidebar = () => {
         <Divider />
 
         <ListItem
-          button
-          onClick={handleLogout}
+          onClick={handleLogout} // ✅ Removed `button` prop
           sx={{ "&:hover": { backgroundColor: "#f8d7da" } }}
         >
-          <ListItemIcon><ExitToApp /></ListItemIcon>
+          <ListItemIcon>
+            <ExitToApp />
+          </ListItemIcon>
           {isOpen && <ListItemText primary="Logout" />}
         </ListItem>
       </List>
