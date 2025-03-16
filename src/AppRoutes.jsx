@@ -27,7 +27,8 @@ import { UpdateMyRestaurant } from "./components/restaurant/UpdateMyRestaurant";
 import AddOffer from "./components/restaurant/AddOffer";
 import { RestaurantDashboard } from "./components/restaurant/RestaurantDashboard";
 import Unauthorized from "./components/pages/Unauthorized";
-import { AdminDashboard } from "./components/admin/AdminDashboard";
+import  AdminDashboard  from "./components/admin/AdminDashboard";
+import AdminUsers from "./components/admin/AdminUsers";
 
 const AppRoutes = () => {
   return (
@@ -66,6 +67,8 @@ const AppRoutes = () => {
 
         {/* Admin */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/users/" element={<AdminUsers />} />
+
 
         {/* Unauthorized Route */}
         <Route path="/unauthorized" element={<Unauthorized />} />
