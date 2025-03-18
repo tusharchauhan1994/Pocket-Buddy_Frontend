@@ -11,6 +11,8 @@ import {
   FaEyeSlash,
   FaArrowLeft,
 } from "react-icons/fa";
+import { Loader } from "../common/Loader";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const {
@@ -20,19 +22,22 @@ const Login = () => {
   } = useForm();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
   const onSubmit = async (data) => {
+    setIsLoading(true);
     try {
       const res = await axios.post("/user/login", data);
       if (res.status === 200) {
-        alert("Login Success");
+        toast.success("Login Success");
         const userData = res.data.data;
         localStorage.setItem("id", userData._id);
         localStorage.setItem("role", userData.roleId.name);
+
         if (userData.roleId.name === "User") {
           navigate("/user/dashboard");
         } else if (userData.roleId.name === "Restaurant") {
@@ -41,19 +46,26 @@ const Login = () => {
           navigate("/admin/dashboard");
         }
       } else {
-        alert("Login Failed");
+        toast.error("Login Failed");
       }
     } catch (error) {
       console.error("Login Error:", error);
-      alert("Invalid Credentials");
+      toast.error("Invalid Credentials");
+    } finally {
+      setIsLoading(false); // Ensures loading state is reset in all cases
     }
   };
 
   return (
     <div
-      className="flex justify-center items-center h-screen bg-cover bg-center"
+      className="relative flex justify-center items-center h-screen bg-cover bg-center"
       style={{ backgroundImage: `url(${loginBg})` }}
     >
+      {isLoading && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 backdrop-blur-lg z-50">
+          <Loader />
+        </div>
+      )}
       <div className="bg-white/30 backdrop-blur-md p-8 rounded-lg shadow-lg w-96 relative">
         <button
           onClick={() => navigate(-1)}
@@ -85,6 +97,7 @@ const Login = () => {
           {errors.email && (
             <p className="text-red-500 text-sm">{errors.email.message}</p>
           )}
+
           <label className="block font-medium text-white">Password</label>
           <div className="relative">
             <input
@@ -103,6 +116,7 @@ const Login = () => {
           {errors.password && (
             <p className="text-red-500 text-sm">{errors.password.message}</p>
           )}
+
           <div className="flex justify-between items-center mt-2 text-sm text-white">
             <div>
               <input type="checkbox" id="rememberMe" className="mr-1" />
@@ -115,6 +129,7 @@ const Login = () => {
               Forgot Password?
             </Link>
           </div>
+
           <button
             type="submit"
             className="mt-4 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-all"

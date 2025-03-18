@@ -6,6 +6,9 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import AppRoutes from "./AppRoutes"; // Routes are now in a separate file
 //import "bootstrap/dist/css/bootstrap.min.css"; // Ensure Bootstrap is imported if needed
 
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"
+
 const Layout = () => {
   const location = useLocation();
   const authPages = useMemo(() => ["/login", "/signup"], []);
@@ -20,6 +23,7 @@ const Layout = () => {
     <div className={authPages.includes(location.pathname) ? "" : "app-wrapper"}>
       <main className="mt-0">
         <AppRoutes />
+        <ToastContainer />
       </main>
     </div>
   );

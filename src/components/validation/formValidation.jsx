@@ -50,6 +50,50 @@ export const forgotPasswordValidation = {
 
 //********** Restaurant **********//
 
+//  Restaurant Validation 
+export const restaurantValidation = {
+  title: {
+    required: "Restaurant Name is required",
+    minLength: { value: 3, message: "Restaurant Name must be at least 3 characters long" },
+  },
+  category: {
+    required: "Category is required",
+  },
+  stateId: {
+    required: "State is required",
+  },
+  cityId: {
+    required: "City is required",
+  },
+  areaId: {
+    required: "Area is required",
+  },
+  foodTypeId: {
+    required: "Food Type is required",
+  },
+  contactNumber: {
+    required: "Contact Number is required",
+    pattern: { value: /^[0-9]{10}$/, message: "Invalid contact number (must be 10 digits)" },
+  },
+  address: {
+    required: "Address is required",
+    minLength: { value: 5, message: "Address must be at least 5 characters long" },
+  },
+  latitude: {
+    required: "Latitude is required",
+    pattern: { value: /^-?([1-8]?[0-9]|90)\\.\\d{1,6}$/, message: "Invalid latitude format" },
+  },
+  longitude: {
+    required: "Longitude is required",
+    pattern: { value: /^-?((1?[0-7]|[0-9])?[0-9]|180)\\.\\d{1,6}$/, message: "Invalid longitude format" },
+  },
+  image: {
+    required: "Restaurant image is required",
+  },
+};
+
+
+
 // Add-Offer validation
 export const offerValidation = {
   title: {

@@ -14,16 +14,17 @@ const handleDelete = async (id, getAllUsers) => {
   if (window.confirm("Are you sure you want to delete this user?")) {
     try {
       await axios.delete(`http://localhost:3000/user/delete/${id}`);
-      
-      toast.success("User deleted successfully! 🚀", { position: "top-right", autoClose: 2000 });
+
+      toast.success("✅ User deleted successfully!", { position: "top-right", autoClose: 2000 });
       getAllUsers(); // ✅ Refresh user list
 
     } catch (error) {
-      toast.error("Failed to delete user. ❌", { position: "top-right", autoClose: 2000 });
+      toast.error("❌ Failed to delete user!", { position: "top-right", autoClose: 2000 });
       console.error("❌ Error deleting user:", error);
     }
   }
 };
+
 
 // Handle Role Change
 const handleRoleChange = async (id, newRole, getAllUsers) => {

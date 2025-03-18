@@ -3,6 +3,10 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import RestaurantSidebar from "./RestaurantSidebar";
+import { toast } from "react-toastify";
+import { Loader } from "../common/Loader";
+
+
 
 export const AddRestaurant = () => {
   const [states, setStates] = useState([]);
@@ -29,19 +33,26 @@ export const AddRestaurant = () => {
 
   const { register, handleSubmit } = useForm();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const submitHandler = async (data) => {
+    setIsLoading(true);
     const userId = localStorage.getItem("id");
     const formData = new FormData();
     Object.keys(data).forEach((key) => formData.append(key, data[key]));
     formData.append("image", data.image[0]);
     formData.append("userId", userId);
-   
-    await axios.post("/location/addWithFile", formData);
-    navigate("/restaurant/myRestaurant");
 
-    alert("Restaurant added successfully");
-    console.log(data);
+    try {
+      await axios.post("/location/addWithFile", formData);
+      toast.success("Restaurant added successfully");
+      navigate("/restaurant/myRestaurant");
+    } catch (error) {
+      toast.error("Failed to add restaurant");
+      console.error("Error adding restaurant:", error);
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -50,6 +61,13 @@ export const AddRestaurant = () => {
       <div className="hidden lg:block w-1/4">
         <RestaurantSidebar />
       </div>
+
+      {/* ✅ Full-Screen Loader Overlay */}
+      {(isLoading || isSubmitting) && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 backdrop-blur-lg z-50">
+          <Loader />
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex justify-center items-center">
