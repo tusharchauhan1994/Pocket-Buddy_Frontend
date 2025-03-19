@@ -18,14 +18,14 @@ export const AdminUsers = () => {
       console.log("🔥 API Response:", res.data);
 
       if (res.data.data && Array.isArray(res.data.data)) {
-        const formattedUsers = res.data.data.map(user => ({
+        const formattedUsers = res.data.data.map((user) => ({
           _id: user._id,
           name: user.name,
           email: user.email,
           role: user.role.toLowerCase(),
           status: user.status === "Active", // ✅ Convert "Active" → true, "Inactive" → false
-        }));                
-        
+        }));
+
         setUsers([...formattedUsers]);
       } else {
         console.error("❌ Unexpected API Response:", res.data);
@@ -50,7 +50,11 @@ export const AdminUsers = () => {
   return (
     <div style={{ display: "flex" }}>
       <AdminSidebar />
-      <Box p={3} flexGrow={1} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Box
+        p={3}
+        flexGrow={1}
+        sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+      >
         <Typography variant="h5" fontWeight="bold">
           Manage Users
         </Typography>
@@ -60,15 +64,21 @@ export const AdminUsers = () => {
 
         {!loading && !error && users.length > 0 && (
           <DataGrid
-          rows={users}
-          columns={columns(getAllUsers, setUsers)} // ✅ Pass setUsers
-          pageSize={5}
-          rowsPerPageOptions={[5, 10]}
-          checkboxSelection
-          sx={{ minHeight: 400, backgroundColor: "#fff", borderRadius: 2, boxShadow: 1 }}
-          getRowId={(row) => row._id || Math.random().toString(36).substr(2, 9)}
-        />        
-        
+            rows={users}
+            columns={columns(getAllUsers, setUsers)} // ✅ Pass setUsers
+            pageSize={5}
+            rowsPerPageOptions={[5, 10]}
+            checkboxSelection
+            sx={{
+              minHeight: 400,
+              backgroundColor: "#fff",
+              borderRadius: 2,
+              boxShadow: 1,
+            }}
+            getRowId={(row) =>
+              row._id || Math.random().toString(36).substr(2, 9)
+            }
+          />
         )}
 
         {!loading && !error && users.length === 0 && (

@@ -25,7 +25,6 @@ const handleDelete = async (id, getAllUsers) => {
   }
 };
 
-
 // Handle Role Change
 const handleRoleChange = async (id, newRole, getAllUsers) => {
   try {

@@ -27,8 +27,11 @@ import { UpdateMyRestaurant } from "./components/restaurant/UpdateMyRestaurant";
 import AddOffer from "./components/restaurant/AddOffer";
 import { RestaurantDashboard } from "./components/restaurant/RestaurantDashboard";
 import Unauthorized from "./components/pages/Unauthorized";
+
+// Admin Pages
 import  AdminDashboard  from "./components/admin/AdminDashboard";
 import AdminUsers from "./components/admin/AdminUsers";
+import AdminManageRestaurants from "./components/admin/AdminManageRestaurants"
 
 const AppRoutes = () => {
   return (
@@ -68,6 +71,7 @@ const AppRoutes = () => {
         {/* Admin */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/users/" element={<AdminUsers />} />
+        <Route path="/admin/restaurants" element={<AdminManageRestaurants />} />
 
 
         {/* Unauthorized Route */}
