@@ -32,6 +32,7 @@ import Unauthorized from "./components/pages/Unauthorized";
 import  AdminDashboard  from "./components/admin/AdminDashboard";
 import AdminUsers from "./components/admin/AdminUsers";
 import AdminManageRestaurants from "./components/admin/AdminManageRestaurants"
+import AdminManageRestaurants2 from "./components/admin/AdminManageRestaurants2"
 
 const AppRoutes = () => {
   return (
@@ -72,7 +73,7 @@ const AppRoutes = () => {
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/users/" element={<AdminUsers />} />
         <Route path="/admin/restaurants" element={<AdminManageRestaurants />} />
-
+        <Route path="/admin/restaurants2" element={<AdminManageRestaurants2 />} />
 
         {/* Unauthorized Route */}
         <Route path="/unauthorized" element={<Unauthorized />} />

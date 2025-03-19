@@ -59,6 +59,7 @@ export const AdminSidebar = () => {
           { path: "/admin/dashboard", label: "Dashboard", icon: <Dashboard /> },
           { path: "/admin/users", label: "Manage Users", icon: <Group /> },
           { path: "/admin/restaurants", label: "Manage Restaurants", icon: <Store /> },
+          { path: "/admin/restaurants2", label: "Manage Restaurants2", icon: <Store /> },
           { path: "/admin/offers", label: "Manage Offers", icon: <LocalOffer /> },
           { path: "/admin/reports", label: "Reports", icon: <Assessment /> },
           { path: "/admin/notifications", label: "Notifications", icon: <Notifications /> },

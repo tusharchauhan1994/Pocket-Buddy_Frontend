@@ -1,8 +1,11 @@
-import { Box, Typography, CircularProgress, Alert, IconButton } from "@mui/material";
+import { Box, Typography, CircularProgress, Alert, IconButton, Button } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import Collapse from "@mui/material/Collapse";
 import AdminSidebar from "./AdminSidebar";
 
@@ -17,7 +20,7 @@ export const ManageRestaurants = () => {
       setLoading(true);
       const res = await axios.get("http://localhost:3000/admin/restaurants");
 
-      console.log("🔥 API Response:", res.data);
+      //console.log("🔥 API Response:", res.data);
 
       if (res.data.data && Array.isArray(res.data.data)) {
         setOwners(res.data.data);
@@ -39,7 +42,7 @@ export const ManageRestaurants = () => {
   return (
     <div style={{ display: "flex" }}>
       <AdminSidebar />
-      <Box p={3} flexGrow={1} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Box p={3} flexGrow={1} sx={{ display: "flex", flexDirection: "column", gap: 2, minHeight: "400px" }}>
         <Typography variant="h5" fontWeight="bold">
           Manage Restaurants
         </Typography>
@@ -49,36 +52,38 @@ export const ManageRestaurants = () => {
 
         {!loading && !error && owners.length > 0 && (
           <DataGrid
-            rows={owners}
+            rows={owners.map((owner) => ({ ...owner, fullName: `${owner.firstName || ''} ${owner.lastName || ''}` }))}
             columns={[
-              { field: "firstName", headerName: "Owner First Name", flex: 1 },
-              { field: "lastName", headerName: "Owner Last Name", flex: 1 },
+              {
+                field: "fullName",
+                headerName: "Owner Name",
+                flex: 1
+              },
               { field: "email", headerName: "Email", flex: 1 },
               {
                 field: "actions",
                 headerName: "Actions",
+                flex: 1,
                 renderCell: (params) => (
-                  <IconButton
-                    onClick={() =>
-                      setExpandedRows((prev) => ({
+                  <>
+                    <IconButton
+                      onClick={() => setExpandedRows((prev) => ({
                         ...prev,
                         [params.row._id]: !prev[params.row._id],
-                      }))
-                    }
-                  >
-                    <ExpandMoreIcon />
-                  </IconButton>
+                      }))}
+                    >
+                      <ExpandMoreIcon />
+                    </IconButton>
+                    <IconButton><VisibilityIcon /></IconButton>
+                    <IconButton><EditIcon /></IconButton>
+                    <IconButton><DeleteIcon /></IconButton>
+                  </>
                 ),
               },
             ]}
             pageSize={5}
             rowsPerPageOptions={[5, 10]}
-            sx={{
-              minHeight: 400,
-              backgroundColor: "#fff",
-              borderRadius: 2,
-              boxShadow: 1,
-            }}
+            sx={{ minHeight: 400, backgroundColor: "#fff", borderRadius: 2, boxShadow: 1 }}
             getRowId={(row) => row._id}
           />
         )}
@@ -89,7 +94,6 @@ export const ManageRestaurants = () => {
           </Typography>
         )}
 
-        {/* Expandable Restaurant List */}
         {owners.map((owner) => (
           <Collapse in={expandedRows[owner._id] || false} key={owner._id} sx={{ mt: 2 }}>
             <Box p={2} bgcolor="#f5f5f5" borderRadius={2}>
@@ -97,16 +101,15 @@ export const ManageRestaurants = () => {
                 Restaurants of {owner.firstName} {owner.lastName}
               </Typography>
 
-              {/* ✅ Check if restaurants exist before rendering DataGrid */}
               {owner.restaurants && owner.restaurants.length > 0 ? (
                 <DataGrid
-                  rows={owner.restaurants} // ✅ Ensure restaurants are passed here
+                  rows={owner.restaurants}
                   columns={[
                     { field: "title", headerName: "Restaurant Name", flex: 1 },
-                    { field: "category", headerName: "Category", flex: 1 }, // ✅ Added category
-                    { field: "description", headerName: "Description", flex: 2 }, // ✅ Added description
-                    { field: "timings", headerName: "Timings", flex: 1 }, // ✅ Added opening hours
-                    { field: "contactNumber", headerName: "Contact", flex: 1 }, // ✅ Added contact number
+                    // { field: "category", headerName: "Category", flex: 1 },
+                    // { field: "description", headerName: "Description", flex: 2 },
+                    // { field: "timings", headerName: "Timings", flex: 1 },
+                    { field: "contactNumber", headerName: "Contact", flex: 1 },
                     { field: "address", headerName: "Address", flex: 1 },
                     { field: "status", headerName: "Status", flex: 1 },
                     {
@@ -126,12 +129,17 @@ export const ManageRestaurants = () => {
                       ),
                     },
                     {
-                      field: "contactNumber",
-                      headerName: "Contact Number",
+                      field: "actions",
+                      headerName: "Actions",
                       flex: 1,
+                      renderCell: () => (
+                        <>
+                          <Button variant="outlined" size="small">View Details</Button>
+                          <Button variant="outlined" size="small" sx={{ mx: 1 }}>Edit</Button>
+                          <Button variant="outlined" size="small" color="error">Delete</Button>
+                        </>
+                      ),
                     },
-                    
-                    
                   ]}
                   pageSize={3}
                   rowsPerPageOptions={[3, 5]}
