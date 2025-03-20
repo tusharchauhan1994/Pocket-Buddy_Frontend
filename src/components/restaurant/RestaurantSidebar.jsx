@@ -63,6 +63,18 @@ export const RestaurantSidebar = () => {
             <BiRestaurant size={20} /> {isOpen && "Add Restaurant"}
           </Link>
 
+          {/* Add Restaurant2 Link */}
+          <Link
+            to="/restaurant/addUpdateRestaurant"
+            className={`flex items-center gap-3 p-2 rounded border-l-4 ${
+              isActive("/restaurant/addUpdateRestaurant")
+                ? "border-red-400 bg-gray-700"
+                : "border-transparent hover:bg-gray-700"
+            }`}
+          >
+            <BiRestaurant size={20} /> {isOpen && "My Restaurant 2"}
+          </Link>
+
           {/* My Restaurant Link */}
           <Link
             to="/restaurant/myRestaurant"
