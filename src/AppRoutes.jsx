@@ -34,6 +34,7 @@ import AdminUsers from "./components/admin/AdminUsers";
 import AdminManageRestaurants from "./components/admin/AdminManageRestaurants"
 import AdminManageRestaurants2 from "./components/admin/AdminManageRestaurants2"
 import { AddUpdateRestaurant } from "./components/restaurant/AddUpdateRestaurant";
+import RestaurantOffers from "./components/restaurant/RestaurantOffers";
 
 const AppRoutes = () => {
   return (
@@ -66,6 +67,7 @@ const AppRoutes = () => {
         <Route path="/restaurant/addRestaurant" element={<AddRestaurant />} />
         <Route path="/restaurant/addUpdateRestaurant" element={<AddUpdateRestaurant />} />
         <Route path="/restaurant/myRestaurant" element={<ViewMyRestaurant />} />
+        <Route path="/restaurant/myOffers" element={<RestaurantOffers />} />
         <Route
           path="/restaurant/updateRestaurant/:id"
           element={<UpdateMyRestaurant />}

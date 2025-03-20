@@ -87,6 +87,18 @@ export const RestaurantSidebar = () => {
             <BiRestaurant size={20} /> {isOpen && "My Restaurant"}
           </Link>
 
+          {/* My Offers Link */}
+          <Link
+            to="/restaurant/myOffers"
+            className={`flex items-center gap-3 p-2 rounded border-l-4 ${
+              isActive("/restaurant/myOffers")
+                ? "border-red-400 bg-gray-700"
+                : "border-transparent hover:bg-gray-700"
+            }`}
+          >
+            <BiSolidOffer size={20} /> {isOpen && "My Offers"}
+          </Link>
+
           {/* Add Offer Link */}
           <Link
             to="/restaurant/addOffer"
@@ -97,18 +109,6 @@ export const RestaurantSidebar = () => {
             }`}
           >
             <BiSolidOffer size={20} /> {isOpen && "Add Offer"}
-          </Link>
-
-          {/* Manage Offers Link */}
-          <Link
-            to="/restaurant/offers"
-            className={`flex items-center gap-3 p-2 rounded border-l-4 ${
-              isActive("/restaurant/offers")
-                ? "border-red-400 bg-gray-700"
-                : "border-transparent hover:bg-gray-700"
-            }`}
-          >
-            <BiSolidOffer size={20} /> {isOpen && "Manage Offers"}
           </Link>
 
           {/* Reviews Link */}
