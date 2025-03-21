@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import RestaurantSidebar from "./RestaurantSidebar";
 import { toast } from "react-toastify";
 
-
 export const RestaurantOffers = () => {
   const [offers, setOffers] = useState([]);
   const [restaurants, setRestaurants] = useState([]);
@@ -13,26 +12,47 @@ export const RestaurantOffers = () => {
   );
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({});
-   
 
   const handleEdit = (offer) => {
     setEditingId(offer._id);
-    setEditData({ ...offer });
+    setEditData({
+      title: offer.title || "",
+      description: offer.description || "",
+      offer_type: offer.offer_type || "Flat Discount",
+      discount_value: offer.discount_value || "",
+      valid_from: offer.valid_from || "",
+      valid_to: offer.valid_to || "",
+      requires_approval: offer.requires_approval || false,
+      min_order_value: offer.min_order_value || "",
+      max_redemptions: offer.max_redemptions || "",
+      status: offer.status || "Active",
+      image: offer.image || null,
+    });
   };
 
   const handleChange = (e, field) => {
     setEditData({ ...editData, [field]: e.target.value });
   };
 
+  const handleCancel = () => {
+    setEditingId(null);
+    setEditData({});
+  };
+
   const handleSave = async (id) => {
     if (!window.confirm("Are you sure you want to save these changes?")) return;
-  
+
     try {
-      const res = await axios.put(`http://localhost:3000/offer/update/${id}`, editData); // Ensure URL is correct
-  
+      const res = await axios.put(
+        `http://localhost:3000/offer/update/${id}`,
+        editData
+      ); // Ensure URL is correct
+
       if (res.data.success) {
         setOffers((prev) =>
-          prev.map((offer) => (offer._id === id ? { ...offer, ...editData } : offer))
+          prev.map((offer) =>
+            offer._id === id ? { ...offer, ...editData } : offer
+          )
         );
         setEditingId(null);
         toast.success("Offer updated successfully!");
@@ -44,14 +64,15 @@ export const RestaurantOffers = () => {
       toast.error("Failed to update offer.");
     }
   };
-  
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this offer?")) return;
-  
+
     try {
-      const res = await axios.delete(`http://localhost:3000/offer/delete/${id}`); // Add full URL if needed
-  
+      const res = await axios.delete(
+        `http://localhost:3000/offer/delete/${id}`
+      ); // Add full URL if needed
+
       if (res.data.success) {
         setOffers((prev) => prev.filter((offer) => offer._id !== id));
         toast.success("Offer deleted successfully!");
@@ -63,7 +84,6 @@ export const RestaurantOffers = () => {
       toast.error("Failed to delete offer.");
     }
   };
-  
 
   const userId = localStorage.getItem("id");
   // ✅ Fetch the logged-in user's restaurants
@@ -141,7 +161,6 @@ export const RestaurantOffers = () => {
         <RestaurantSidebar />
       </div>
 
-      
       <div className="flex-grow p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800">Manage Offers</h2>
@@ -182,8 +201,14 @@ export const RestaurantOffers = () => {
                 <th className="p-3 text-left">#</th>
                 <th className="p-3 text-left">Image</th>
                 <th className="p-3 text-left">Title</th>
+                <th className="p-3 text-left">Description</th>
+                <th className="p-3 text-left">Offer Type</th>
                 <th className="p-3 text-left">Discount</th>
+                <th className="p-3 text-left">Valid From</th>
                 <th className="p-3 text-left">Valid Until</th>
+                <th className="p-3 text-left">Min Order Value</th>
+                <th className="p-3 text-left">Max Redemptions</th>
+                <th className="p-3 text-left">Requires Approval</th>
                 <th className="p-3 text-left">Status</th>
                 <th className="p-3 text-left">Actions</th>
               </tr>
@@ -206,6 +231,9 @@ export const RestaurantOffers = () => {
                           type="text"
                           value={editData.title}
                           onChange={(e) => handleChange(e, "title")}
+                          onKeyDown={(e) =>
+                            e.key === "Enter" && handleSave(offer._id)
+                          }
                           className="border p-1"
                         />
                       ) : (
@@ -214,10 +242,43 @@ export const RestaurantOffers = () => {
                     </td>
                     <td className="p-3">
                       {editingId === offer._id ? (
+                        <textarea
+                          value={editData.description}
+                          onChange={(e) => handleChange(e, "description")}
+                          onKeyDown={(e) =>
+                            e.key === "Enter" && handleSave(offer._id)
+                          }
+                          className="border p-1 w-full"
+                        />
+                      ) : (
+                        offer.description
+                      )}
+                    </td>
+                    <td className="p-3">
+                      {editingId === offer._id ? (
+                        <select
+                          value={editData.offer_type}
+                          onChange={(e) => handleChange(e, "offer_type")}
+                          className="border p-1"
+                        >
+                          <option value="Flat Discount">Flat Discount</option>
+                          <option value="Percentage Discount">
+                            Percentage Discount
+                          </option>
+                        </select>
+                      ) : (
+                        offer.offer_type
+                      )}
+                    </td>
+                    <td className="p-3">
+                      {editingId === offer._id ? (
                         <input
                           type="number"
                           value={editData.discount_value}
                           onChange={(e) => handleChange(e, "discount_value")}
+                          onKeyDown={(e) =>
+                            e.key === "Enter" && handleSave(offer._id)
+                          }
                           className="border p-1 w-16"
                         />
                       ) : (
@@ -228,12 +289,73 @@ export const RestaurantOffers = () => {
                       {editingId === offer._id ? (
                         <input
                           type="date"
+                          value={editData.valid_from}
+                          onChange={(e) => handleChange(e, "valid_from")}
+                          onKeyDown={(e) =>
+                            e.key === "Enter" && handleSave(offer._id)
+                          }
+                          className="border p-1"
+                        />
+                      ) : (
+                        new Date(offer.valid_from).toLocaleDateString()
+                      )}
+                    </td>
+                    <td className="p-3">
+                      {editingId === offer._id ? (
+                        <input
+                          type="date"
                           value={editData.valid_to}
                           onChange={(e) => handleChange(e, "valid_to")}
+                          onKeyDown={(e) =>
+                            e.key === "Enter" && handleSave(offer._id)
+                          }
                           className="border p-1"
                         />
                       ) : (
                         new Date(offer.valid_to).toLocaleDateString()
+                      )}
+                    </td>
+                    <td className="p-3">
+                      {editingId === offer._id ? (
+                        <input
+                          type="number"
+                          value={editData.min_order_value}
+                          onChange={(e) => handleChange(e, "min_order_value")}
+                          className="border p-1 w-20"
+                        />
+                      ) : (
+                        offer.min_order_value
+                      )}
+                    </td>
+                    <td className="p-3">
+                      {editingId === offer._id ? (
+                        <input
+                          type="number"
+                          value={editData.max_redemptions}
+                          onChange={(e) => handleChange(e, "max_redemptions")}
+                          className="border p-1 w-20"
+                        />
+                      ) : (
+                        offer.max_redemptions
+                      )}
+                    </td>
+                    <td className="p-3">
+                      {editingId === offer._id ? (
+                        <input
+                          type="checkbox"
+                          checked={editData.requires_approval}
+                          onChange={(e) =>
+                            handleChange(
+                              { target: { value: e.target.checked } },
+                              "requires_approval"
+                            )
+                          }
+                          className="border p-1"
+                        />
+                      ) : offer.requires_approval ? (
+                        "Yes"
+                      ) : (
+                        "No"
                       )}
                     </td>
                     <td className="p-3">
@@ -261,12 +383,20 @@ export const RestaurantOffers = () => {
                     <td className="p-3">
                       <div className="flex flex-col space-y-2">
                         {editingId === offer._id ? (
-                          <button
-                            onClick={() => handleSave(offer._id)}
-                            className="px-4 py-1 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition"
-                          >
-                            Save
-                          </button>
+                          <>
+                            <button
+                              onClick={() => handleSave(offer._id)}
+                              className="px-4 py-1 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={handleCancel}
+                              className="px-4 py-1 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600 transition"
+                            >
+                              Cancel
+                            </button>
+                          </>
                         ) : (
                           <button
                             onClick={() => handleEdit(offer)}

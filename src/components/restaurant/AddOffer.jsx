@@ -275,6 +275,11 @@ const AddOffer = () => {
 
 export default AddOffer;
 
+
+
+
+
+//old code
 // import React, { useState } from "react";
 // import { useForm } from "react-hook-form";
 // import { offerValidation } from "../validation/formValidation";
