@@ -29,12 +29,14 @@ import { RestaurantDashboard } from "./components/restaurant/RestaurantDashboard
 import Unauthorized from "./components/pages/Unauthorized";
 
 // Admin Pages
-import  AdminDashboard  from "./components/admin/AdminDashboard";
+import AdminDashboard from "./components/admin/AdminDashboard";
 import AdminUsers from "./components/admin/AdminUsers";
-import AdminManageRestaurants from "./components/admin/AdminManageRestaurants"
-import AdminManageRestaurants2 from "./components/admin/AdminManageRestaurants2"
+import AdminManageRestaurants from "./components/admin/AdminManageRestaurants";
+import AdminManageRestaurants2 from "./components/admin/AdminManageRestaurants2";
 import { AddUpdateRestaurant } from "./components/restaurant/AddUpdateRestaurant";
 import RestaurantOffers from "./components/restaurant/RestaurantOffers";
+import ResetPassword from "./components/auth/ResetPassword";
+import { UserOfferDetail } from "./components/user/UserOfferDetail";
 
 const AppRoutes = () => {
   return (
@@ -50,7 +52,8 @@ const AppRoutes = () => {
       {/* Authentication */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/forgot-password/" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
 
       {/* Protected Routes */}
       <Route element={<PrivateRoutes />}>
@@ -60,12 +63,17 @@ const AppRoutes = () => {
         <Route path="/user/about" element={<UserAbout />} />
         <Route path="/user/menu" element={<UserMenu />} />
         <Route path="/user/review" element={<UserReview />} />
+        <Route path="/offer/:id" element={<UserOfferDetail />} />
+
 
         {/* Restaurant Routes */}
         <Route path="/restaurant/dashboard" element={<RestaurantDashboard />} />
         <Route path="/restaurant/addOffer" element={<AddOffer />} />
         <Route path="/restaurant/addRestaurant" element={<AddRestaurant />} />
-        <Route path="/restaurant/addUpdateRestaurant" element={<AddUpdateRestaurant />} />
+        <Route
+          path="/restaurant/addUpdateRestaurant"
+          element={<AddUpdateRestaurant />}
+        />
         <Route path="/restaurant/myRestaurant" element={<ViewMyRestaurant />} />
         <Route path="/restaurant/myOffers" element={<RestaurantOffers />} />
         <Route
@@ -77,7 +85,10 @@ const AppRoutes = () => {
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/users/" element={<AdminUsers />} />
         <Route path="/admin/restaurants" element={<AdminManageRestaurants />} />
-        <Route path="/admin/restaurants2" element={<AdminManageRestaurants2 />} />
+        <Route
+          path="/admin/restaurants2"
+          element={<AdminManageRestaurants2 />}
+        />
 
         {/* Unauthorized Route */}
         <Route path="/unauthorized" element={<Unauthorized />} />
