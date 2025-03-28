@@ -38,6 +38,9 @@ import RestaurantOffers from "./components/restaurant/RestaurantOffers";
 import ResetPassword from "./components/auth/ResetPassword";
 import { UserOfferDetail } from "./components/user/UserOfferDetail";
 import ManageOfferRequests from "./components/restaurant/ManageOfferRequests";
+import { UserRequests } from "./components/user/UserRequests";
+import UserOffers from "./components/user/UserOffers";
+import UserRestaurant from "./components/user/UserRestaurant";
 
 const AppRoutes = () => {
   return (
@@ -60,6 +63,11 @@ const AppRoutes = () => {
       <Route element={<PrivateRoutes />}>
         {/* User Routes */}
         <Route path="/user/dashboard" element={<UserDashboard />} />
+        <Route path="/user/MyRequests" element={<UserRequests />} />
+        <Route path="/user/offers" element={<UserOffers />} />
+        <Route path="/user/restaurants" element={<UserRestaurant />} />
+
+
         <Route path="/user/dishes" element={<UserDishes />} />
         <Route path="/user/about" element={<UserAbout />} />
         <Route path="/user/menu" element={<UserMenu />} />

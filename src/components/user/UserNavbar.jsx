@@ -1,14 +1,13 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { BiRestaurant, BiChevronDown, BiSearch, BiHeart, BiUser } from "react-icons/bi";
 import { AiOutlineMenuUnfold, AiOutlineClose } from "react-icons/ai";
 
-export const UserNavbar = () => {
+export const UserNavbar = ({ setSearchQuery }) => {
   const [menu, setMenu] = useState(false);
   const [dropdown, setDropdown] = useState(false);
   const [profileDropdown, setProfileDropdown] = useState(false);
   const [search, setSearch] = useState("");
-  const navigate = useNavigate();
 
   let profileTimeout;
 
@@ -19,13 +18,14 @@ export const UserNavbar = () => {
     localStorage.removeItem("id");
     localStorage.removeItem("role");
     alert("You are logged out");
-    navigate("/login");
+    window.location.href = "/login";
   };
 
   const handleSearch = (e) => {
     e.preventDefault();
-    navigate(`/search?query=${search}`);
+    setSearchQuery(search); // Update search results dynamically
   };
+  
 
   return (
     <header className="fixed top-0 w-full bg-white shadow-md z-50 h-18">
@@ -55,18 +55,11 @@ export const UserNavbar = () => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8 text-lg font-medium">
-          <Link to="/user/dashboard" className="hover:text-red-500 transition-all">
-            Home
-          </Link>
-          <Link to="/user/offers" className="hover:text-red-500 transition-all">
-            Offers
-          </Link>
-          <Link to="/user/restaurants" className="hover:text-red-500 transition-all">
-            Restaurants
-          </Link>
-          <Link to="/user/review" className="hover:text-red-500 transition-all">
-            Reviews
-          </Link>
+          <Link to="/user/dashboard" className="hover:text-red-500 transition-all">Home</Link>
+          <Link to="/user/offers" className="hover:text-red-500 transition-all">Offers</Link>
+          <Link to="/user/MyRequests" className="hover:text-red-500 transition-all">My Requests</Link>
+          <Link to="/user/restaurants" className="hover:text-red-500 transition-all">Restaurants</Link>
+          <Link to="/user/review" className="hover:text-red-500 transition-all">Reviews</Link>
 
           {/* Profile Dropdown */}
           <div
@@ -118,24 +111,12 @@ export const UserNavbar = () => {
       {/* Mobile Menu */}
       {menu && (
         <div className="fixed top-[60px] left-0 w-full bg-black text-white flex flex-col items-center gap-4 py-6 text-center">
-          <Link to="/user/dashboard" onClick={closeMenu} className="hover:text-gray-400">
-            Home
-          </Link>
-          <Link to="/user/offers" onClick={closeMenu} className="hover:text-gray-400">
-            Buy Offers
-          </Link>
-          <Link to="/user/restaurants" onClick={closeMenu} className="hover:text-gray-400">
-            Restaurants
-          </Link>
-          <Link to="/user/review" onClick={closeMenu} className="hover:text-gray-400">
-            Reviews
-          </Link>
-          <Link to="/user/profile" onClick={closeMenu} className="hover:text-gray-400">
-            Profile
-          </Link>
-          <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded w-1/2">
-            Logout
-          </button>
+          <Link to="/user/dashboard" onClick={closeMenu} className="hover:text-gray-400">Home</Link>
+          <Link to="/user/offers" onClick={closeMenu} className="hover:text-gray-400">Buy Offers</Link>
+          <Link to="/user/restaurants" onClick={closeMenu} className="hover:text-gray-400">Restaurants</Link>
+          <Link to="/user/review" onClick={closeMenu} className="hover:text-gray-400">Reviews</Link>
+          <Link to="/user/profile" onClick={closeMenu} className="hover:text-gray-400">Profile</Link>
+          <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded w-1/2">Logout</button>
         </div>
       )}
     </header>

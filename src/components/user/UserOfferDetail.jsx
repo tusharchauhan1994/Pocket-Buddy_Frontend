@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { UserNavbar } from "./UserNavbar";
 import { UserFooter } from "./UserFooter";
+import { toast } from "react-toastify";
 import axios from "axios";
 
 export const UserOfferDetail = () => {

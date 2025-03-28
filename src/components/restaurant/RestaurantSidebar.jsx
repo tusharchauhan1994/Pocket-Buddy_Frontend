@@ -25,10 +25,11 @@ export const RestaurantSidebar = () => {
     <div className="flex h-screen">
       {/* Sidebar Component */}
       <aside
-        className={`bg-gray-900 text-white fixed top-0 left-0 transition-all duration-300 ${
-          isOpen ? "w-64" : "w-20"
-        } h-full`}
-      >
+  className={`bg-gray-900 text-white transition-all duration-300 ${
+    isOpen ? "w-64" : "w-20"
+  } h-full relative`}
+>
+
         {/* Sidebar Header */}
         <div className="p-5 text-xl font-bold border-b border-gray-700 flex items-center justify-between">
           {isOpen && <span>Pocket Buddy</span>}
