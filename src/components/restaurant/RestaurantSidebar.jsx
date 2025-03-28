@@ -51,6 +51,18 @@ export const RestaurantSidebar = () => {
             <BiRestaurant size={20} /> {isOpen && "Dashboard"}
           </Link>
 
+          {/* Manage Offer Requests.jsx */}
+          <Link
+            to="/restaurant/ManageOfferRequests"
+            className={`flex items-center gap-3 p-2 rounded border-l-4 ${
+              isActive("/restaurant/ManageOfferRequests")
+                ? "border-red-400 bg-gray-700"
+                : "border-transparent hover:bg-gray-700"
+            }`}
+          >
+            <BiRestaurant size={20} /> {isOpen && "Offer Requests"}
+          </Link>
+
           {/* Add Restaurant Link */}
           <Link
             to="/restaurant/addRestaurant"

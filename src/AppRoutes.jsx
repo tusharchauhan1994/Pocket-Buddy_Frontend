@@ -37,6 +37,7 @@ import { AddUpdateRestaurant } from "./components/restaurant/AddUpdateRestaurant
 import RestaurantOffers from "./components/restaurant/RestaurantOffers";
 import ResetPassword from "./components/auth/ResetPassword";
 import { UserOfferDetail } from "./components/user/UserOfferDetail";
+import ManageOfferRequests from "./components/restaurant/ManageOfferRequests";
 
 const AppRoutes = () => {
   return (
@@ -80,6 +81,7 @@ const AppRoutes = () => {
           path="/restaurant/updateRestaurant/:id"
           element={<UpdateMyRestaurant />}
         />
+        <Route path="/restaurant/ManageOfferRequests" element={<ManageOfferRequests />} />
 
         {/* Admin */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />

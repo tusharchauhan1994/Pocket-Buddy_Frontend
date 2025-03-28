@@ -61,14 +61,16 @@ export const UserDashboard = () => {
               key={offer._id}
               className="border rounded-lg shadow-lg overflow-hidden"
             >
-              {/* Image Container to Maintain Aspect Ratio */}
-              <div className="w-full aspect-w-16 aspect-h-9">
-                <img
-                  src={offer.imageURL || "https://via.placeholder.com/300"}
-                  alt={offer.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              {/* Clickable Image */}
+              <Link to={`/offer/${offer._id}`}>
+                <div className="w-full aspect-w-16 aspect-h-9">
+                  <img
+                    src={offer.imageURL || "https://via.placeholder.com/300"}
+                    alt={offer.title}
+                    className="w-full h-full object-cover cursor-pointer"
+                  />
+                </div>
+              </Link>
 
               {/* Offer Details */}
               <div className="p-4">
@@ -87,6 +89,8 @@ export const UserDashboard = () => {
                 <p className="text-gray-500 text-sm">
                   Valid Until: {new Date(offer.valid_to).toLocaleDateString()}
                 </p>
+
+                {/* Claim Offer Button */}
                 <Link to={`/offer/${offer._id}`}>
                   <button className="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
                     Claim Offer
@@ -97,6 +101,7 @@ export const UserDashboard = () => {
           ))}
         </div>
       </section>
+
       <UserFooter />
     </div>
   );
