@@ -22,7 +22,7 @@ export const RestaurantSidebar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="flex min-h-screen ">
+    <div className="flex min-h-screen fixed">
       {/* Sidebar Component */}
       <aside
         className={`bg-gray-900 text-white transition-all fixed top-0 left-0 duration-300 overflow-y-auto ${
