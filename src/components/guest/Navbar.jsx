@@ -12,7 +12,7 @@ const Navbar = () => {
   const closeMenu = () => setMenu(false);
 
   return (
-    <header className="fixed w-full bg-white shadow-md z-50">
+    <header className="fixed w-full bg-white shadow-md z-50 top-0 ">
       <div className="flex justify-between items-center p-5 md:px-32 px-5">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 cursor-pointer">
@@ -26,7 +26,7 @@ const Navbar = () => {
             Home
           </Link>
 
-          {/* Dropdown Menu */}
+          {/* Dropdown Menu
           <div
             className="relative"
             onMouseEnter={() => setDropdown(true)}
@@ -74,13 +74,13 @@ const Navbar = () => {
                 </li>
               </ul>
             )}
-          </div>
+          </div> */}
 
-          <Link to="/about" className="hover:text-red-500 transition-all">
-            About
+          <Link to="/offers" className="hover:text-red-500 transition-all">
+          offers
           </Link>
-          <Link to="/menu" className="hover:text-red-500 transition-all">
-            Menu
+          <Link to="/restaurants" className="hover:text-red-500 transition-all">
+          restaurants
           </Link>
           <Link to="/review" className="hover:text-red-500 transition-all">
             Reviews

@@ -29,6 +29,7 @@ export const UserRequests = () => {
   }, []);
 
   return (
+    <>
     <div className="flex flex-col min-h-screen">
       <UserNavbar />
       <div className="px-5 lg:px-32 py-10">
@@ -108,7 +109,9 @@ export const UserRequests = () => {
           <p className="text-gray-600">You have no requests yet.</p>
         )}
       </div>
-      <UserFooter />
+      
     </div>
+    <UserFooter />
+    </>
   );
 };

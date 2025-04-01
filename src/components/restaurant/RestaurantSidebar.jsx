@@ -22,14 +22,13 @@ export const RestaurantSidebar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="flex h-screen">
+    <div className="flex min-h-screen ">
       {/* Sidebar Component */}
       <aside
-  className={`bg-gray-900 text-white transition-all duration-300 ${
-    isOpen ? "w-64" : "w-20"
-  } h-full relative`}
->
-
+        className={`bg-gray-900 text-white transition-all fixed top-0 left-0 duration-300 overflow-y-auto ${
+          isOpen ? "w-64" : "w-20"
+        } min-h-screen overflow-y-auto relative`}
+      >
         {/* Sidebar Header */}
         <div className="p-5 text-xl font-bold border-b border-gray-700 flex items-center justify-between">
           {isOpen && <span>Pocket Buddy</span>}
@@ -52,7 +51,7 @@ export const RestaurantSidebar = () => {
             <BiRestaurant size={20} /> {isOpen && "Dashboard"}
           </Link>
 
-          {/* Manage Offer Requests.jsx */}
+          {/* Manage Offer Requests */}
           <Link
             to="/restaurant/ManageOfferRequests"
             className={`flex items-center gap-3 p-2 rounded border-l-4 ${
@@ -74,18 +73,6 @@ export const RestaurantSidebar = () => {
             }`}
           >
             <BiRestaurant size={20} /> {isOpen && "Add Restaurant"}
-          </Link>
-
-          {/* Add Restaurant2 Link */}
-          <Link
-            to="/restaurant/addUpdateRestaurant"
-            className={`flex items-center gap-3 p-2 rounded border-l-4 ${
-              isActive("/restaurant/addUpdateRestaurant")
-                ? "border-red-400 bg-gray-700"
-                : "border-transparent hover:bg-gray-700"
-            }`}
-          >
-            <BiRestaurant size={20} /> {isOpen && "My Restaurant 2"}
           </Link>
 
           {/* My Restaurant Link */}
