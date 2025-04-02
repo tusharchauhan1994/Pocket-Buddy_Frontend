@@ -43,6 +43,8 @@ import UserOffers from "./components/user/UserOffers";
 import UserRestaurant from "./components/user/UserRestaurant";
 import AdminManageOffers from "./components/admin/AdminManageOffers";
 import GuestOffers from "./components/guest/GuestOffers";
+import { GuestRestaurant } from "./components/guest/GuestRestaurant";
+import { GuestRestaurantOffersPage } from "./components/guest/GuestRestaurantOffersPage";
 
 const AppRoutes = () => {
   return (
@@ -50,6 +52,8 @@ const AppRoutes = () => {
       {/* Public Routes */}
       <Route path="/" element={<Home />} />
       <Route path="/offers" element={<GuestOffers />} />
+      <Route path="/restaurants" element={<GuestRestaurant />} />
+      <Route path="/restaurant/:id/offers" element={<GuestRestaurantOffersPage />} />
       <Route path="/review" element={<Review />} />
       <Route path="*" element={<NotFound />} />
 
@@ -90,6 +94,9 @@ const AppRoutes = () => {
           element={<UpdateMyRestaurant />}
         />
         <Route path="/restaurant/ManageOfferRequests" element={<ManageOfferRequests />} />
+        
+
+
 
         {/* Admin */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />

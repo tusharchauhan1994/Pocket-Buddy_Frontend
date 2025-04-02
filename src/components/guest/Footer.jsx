@@ -1,82 +1,134 @@
 import React from "react";
-import { BsFacebook } from "react-icons/bs";
+import { BsFacebook, BsInstagram, BsLinkedin } from "react-icons/bs";
 import { RiTwitterXFill } from "react-icons/ri";
-import { BsInstagram } from "react-icons/bs";
 
 const Footer = () => {
+  const currentYear = new Date().getFullYear();
+
+  const quickLinks = [
+    { name: "Home", path: "/" },
+    { name: "About Us", path: "/about" },
+    { name: "Offers", path: "/offers" },
+    { name: "Restaurants", path: "/restaurants" },
+  ];
+
+  const features = [
+    { name: "User Dashboard", path: "/dashboard" },
+    { name: "Restaurant Panel", path: "/restaurant-dashboard" },
+    { name: "Deals & Coupons", path: "/deals" },
+  ];
+
+  const socialMedia = [
+    { icon: <BsFacebook size={20} />, url: "https://facebook.com/pocketbuddy" },
+    { icon: <RiTwitterXFill size={20} />, url: "https://twitter.com/pocketbuddy" },
+    { icon: <BsInstagram size={20} />, url: "https://instagram.com/pocketbuddy" },
+    { icon: <BsLinkedin size={20} />, url: "https://linkedin.com/company/pocketbuddy" },
+  ];
+
   return (
-    <div className="bg-black text-white rounded-t-3xl">
-      <div className="flex flex-col md:flex-row justify-between p-8 md:px-32 px-5">
-        {/* Brand Section */}
-        <div className="w-full md:w-1/4">
-          <h1 className="font-semibold text-xl pb-4">Pocket Buddy</h1>
-          <p className="text-sm">
-            Discover exclusive restaurant deals and manage your favorite places, all in one app!
+    <footer className="bg-black text-white rounded-t-3xl">
+      <div className="container mx-auto px-5 py-8 md:px-32">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Brand Section */}
+          <div className="space-y-4">
+            <h2 className="font-semibold text-2xl">Pocket Buddy</h2>
+            <p className="text-gray-300 text-sm">
+              Discover exclusive restaurant deals and manage your favorite places, all in one app!
+            </p>
+            <div className="flex space-x-4 pt-2">
+              {socialMedia.map((social, index) => (
+                <a
+                  key={index}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-brightColor transition-colors duration-300"
+                  aria-label={social.url.split('.')[1]}
+                >
+                  {social.icon}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div className="space-y-4">
+            <h3 className="font-medium text-xl">Quick Links</h3>
+            <nav className="space-y-2">
+              {quickLinks.map((link, index) => (
+                <a
+                  key={index}
+                  href={link.path}
+                  className="block text-gray-300 hover:text-brightColor transition-colors duration-200"
+                >
+                  {link.name}
+                </a>
+              ))}
+            </nav>
+          </div>
+
+          {/* Features */}
+          <div className="space-y-4">
+            <h3 className="font-medium text-xl">Features</h3>
+            <nav className="space-y-2">
+              {features.map((feature, index) => (
+                <a
+                  key={index}
+                  href={feature.path}
+                  className="block text-gray-300 hover:text-brightColor transition-colors duration-200"
+                >
+                  {feature.name}
+                </a>
+              ))}
+            </nav>
+          </div>
+
+          {/* Contact Section */}
+          <div className="space-y-4">
+            <h3 className="font-medium text-xl">Contact Us</h3>
+            <address className="not-italic space-y-2">
+              <a
+                href="mailto:pocketbuddy.food.offers@gmail.com"
+                className="block text-gray-300 hover:text-brightColor transition-colors duration-200"
+              >
+                pocketbuddy.food.offers@gmail.com
+              </a>
+              <a
+                href="tel:+919999988888"
+                className="block text-gray-300 hover:text-brightColor transition-colors duration-200"
+              >
+                +91 99999 88888
+              </a>
+              <p className="text-gray-300">123 Food Street, Tech City</p>
+              <p className="text-gray-300">India - 560001</p>
+            </address>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-800 my-8"></div>
+
+        {/* Footer Bottom */}
+        <div className="text-center text-gray-400 text-sm">
+          <p>
+            © {currentYear} Developed by{" "}
+            <span className="text-brightColor font-medium">Pocket Buddy Team</span> | All rights reserved
           </p>
-        </div>
-
-        {/* Quick Links */}
-        <div>
-          <h1 className="font-medium text-xl pb-4 pt-5 md:pt-0">Quick Links</h1>
-          <nav className="flex flex-col gap-2">
-            <a className="hover:text-brightColor transition-all cursor-pointer" href="/">Home</a>
-            <a className="hover:text-brightColor transition-all cursor-pointer" href="/about">About Us</a>
-            <a className="hover:text-brightColor transition-all cursor-pointer" href="/offers">Offers</a>
-            <a className="hover:text-brightColor transition-all cursor-pointer" href="/restaurants">Restaurants</a>
-          </nav>
-        </div>
-
-        {/* Features */}
-        <div>
-          <h1 className="font-medium text-xl pb-4 pt-5 md:pt-0">Features</h1>
-          <nav className="flex flex-col gap-2">
-            <a className="hover:text-brightColor transition-all cursor-pointer" href="/dashboard">User Dashboard</a>
-            <a className="hover:text-brightColor transition-all cursor-pointer" href="/restaurant-dashboard">Restaurant Panel</a>
-          </nav>
-        </div>
-
-        {/* Contact Section */}
-        <div>
-          <h1 className="font-medium text-xl pb-4 pt-5 md:pt-0">Contact Us</h1>
-          <nav className="flex flex-col gap-2">
-            <a className="hover:text-brightColor transition-all cursor-pointer" href="mailto:support@pocketbuddy.com">
-              support@pocketbuddy.com
+          <div className="flex justify-center space-x-4 mt-2">
+            <a href="/privacy-policy" className="hover:text-brightColor transition-colors">
+              Privacy Policy
             </a>
-            <a className="hover:text-brightColor transition-all cursor-pointer" href="tel:+919876543210">
-              +91 98765 43210
+            <a href="/terms" className="hover:text-brightColor transition-colors">
+              Terms of Service
             </a>
-            <a className="hover:text-brightColor transition-all cursor-pointer" href="/social-media">
-              Follow us on Social Media
+            <a href="/cookies" className="hover:text-brightColor transition-colors">
+              Cookie Policy
             </a>
-          </nav>
+          </div>
         </div>
       </div>
-
-      {/* Footer Bottom */}
-      <div>
-        <p className="text-center py-4">
-          © {new Date().getFullYear()} Developed by
-          <span className="text-brightColor"> Pocket Buddy Team</span> | All rights reserved
-        </p>
-      </div>
-    </div>
+    </footer>
   );
 };
 
-const App = () => {
-  return (<>
-    {/*  <div className="flex flex-col min-h-screen"> */}
-      {/* Main content */}
-      {/* <div className="flex-grow"> */}
-        {/* Your content goes here */}
-      {/* </div> */}
-
-      {/* Footer at the bottom */}
-      
-    {/* </div> */}
-    <Footer />
-    </>
-  );
-};
-
-export default App;
+export default Footer;

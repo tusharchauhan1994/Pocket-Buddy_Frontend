@@ -22,9 +22,9 @@ const GuestOffers = () => {
         console.log("Fetching offers..."); // Debug log
         const response = await axios.get("http://localhost:3000/offer");
         console.log("API Response:", response); // Debug log
-        
+
         let fetchedOffers = [];
-        
+
         if (Array.isArray(response.data)) {
           fetchedOffers = response.data;
         } else if (Array.isArray(response.data?.offers)) {
@@ -43,19 +43,19 @@ const GuestOffers = () => {
         setLoading(false);
       }
     };
-    
+
     fetchOffers();
   }, []);
 
   const filteredOffers = offers.filter((offer) => {
-    const matchesSearch = 
+    const matchesSearch =
       offer.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       offer.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesFilter = 
-      filterType === "all" || 
+
+    const matchesFilter =
+      filterType === "all" ||
       offer.offer_type?.toLowerCase().includes(filterType.toLowerCase());
-    
+
     return matchesSearch && matchesFilter;
   });
 
@@ -75,23 +75,30 @@ const GuestOffers = () => {
 
   const renderOfferCards = () => {
     if (loading) {
-      return Array(6).fill(0).map((_, index) => (
-        <div key={index} className="border rounded-lg shadow-lg overflow-hidden">
-          <Skeleton height={180} />
-          <div className="p-4">
-            <Skeleton count={3} />
-            <Skeleton width={100} height={30} className="mt-3" />
+      return Array(6)
+        .fill(0)
+        .map((_, index) => (
+          <div
+            key={index}
+            className="border rounded-lg shadow-lg overflow-hidden"
+          >
+            <Skeleton height={180} />
+            <div className="p-4">
+              <Skeleton count={3} />
+              <Skeleton width={100} height={30} className="mt-3" />
+            </div>
           </div>
-        </div>
-      ));
+        ));
     }
 
     if (error) {
       return (
         <div className="col-span-3 flex flex-col items-center justify-center py-10 text-center">
-          <h3 className="text-xl font-medium text-red-600 mb-2">Error Loading Offers</h3>
+          <h3 className="text-xl font-medium text-red-600 mb-2">
+            Error Loading Offers
+          </h3>
           <p className="text-gray-600 mb-4">{error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
           >
@@ -106,8 +113,8 @@ const GuestOffers = () => {
         <div className="col-span-3 flex flex-col items-center justify-center py-10 text-center">
           <ImSad className="text-4xl text-gray-400 mb-3" />
           <h3 className="text-xl font-medium text-gray-600 mb-2">
-            {searchQuery || filterType !== "all" 
-              ? "No offers match your criteria" 
+            {searchQuery || filterType !== "all"
+              ? "No offers match your criteria"
               : "No offers available"}
           </h3>
           <p className="text-gray-500 max-w-md">
@@ -116,7 +123,7 @@ const GuestOffers = () => {
               : "There are currently no offers to display."}
           </p>
           {(searchQuery || filterType !== "all") && (
-            <button 
+            <button
               onClick={() => {
                 setSearchQuery("");
                 setFilterType("all");
@@ -131,8 +138,8 @@ const GuestOffers = () => {
     }
 
     return sortedOffers.map((offer) => (
-      <div 
-        key={offer._id} 
+      <div
+        key={offer._id}
         className="border rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
       >
         <Link to={`/offer/${offer._id}`} className="block">
@@ -151,9 +158,11 @@ const GuestOffers = () => {
           </div>
         </Link>
         <div className="p-4">
-          <h3 className="text-xl font-semibold mb-2 line-clamp-1">{offer.title}</h3>
+          <h3 className="text-xl font-semibold mb-2 line-clamp-1">
+            {offer.title}
+          </h3>
           <p className="text-gray-600 mb-3 line-clamp-2">{offer.description}</p>
-          
+
           <div className="flex items-center justify-between mb-3">
             <span className="text-lg font-bold text-red-500">
               {offer.offer_type === "Flat Discount"
@@ -162,22 +171,28 @@ const GuestOffers = () => {
                 ? `${offer.discount_value}% OFF`
                 : offer.offer_type}
             </span>
-            
+
             <div className="flex items-center text-gray-500 text-sm">
               <FaRegClock className="mr-1" />
-              <span>{new Date(offer.valid_to).toLocaleDateString()}</span>
+              <span>
+                {new Date(offer.valid_to).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })}
+              </span>
             </div>
           </div>
-          
+
           <div className="flex justify-between items-center">
-            <Link 
-              to="/signup" 
+            <Link
+              to="/signup"
               className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded hover:from-blue-600 hover:to-blue-700 transition-all flex-1 text-center"
             >
               Sign Up to Claim
             </Link>
-            <Link 
-              to={`/offer/${offer._id}`} 
+            <Link
+              to={`/offer/${offer._id}`}
               className="ml-2 p-2 text-blue-500 hover:text-blue-700 transition-colors"
               title="More details"
             >
@@ -192,15 +207,17 @@ const GuestOffers = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 mt-10">
       <Navbar />
-      
+
       <section className="px-5 lg:px-32 py-10 flex-grow mt-5">
         <div className="mb-2">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Exclusive Offers</h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+            Exclusive Offers
+          </h1>
           <p className="text-gray-600">
             Sign up to unlock these amazing deals and more!
           </p>
         </div>
-        
+
         <div className="mb-8 bg-white p-4 rounded-lg shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="relative flex-grow max-w-2xl">
@@ -213,10 +230,13 @@ const GuestOffers = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            
+
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex items-center">
-                <label htmlFor="filter" className="mr-2 text-gray-600 whitespace-nowrap">
+                <label
+                  htmlFor="filter"
+                  className="mr-2 text-gray-600 whitespace-nowrap"
+                >
                   <FaTag className="inline mr-1" />
                   Filter:
                 </label>
@@ -231,9 +251,12 @@ const GuestOffers = () => {
                   <option value="percentage">Percentage</option>
                 </select>
               </div>
-              
+
               <div className="flex items-center">
-                <label htmlFor="sort" className="mr-2 text-gray-600 whitespace-nowrap">
+                <label
+                  htmlFor="sort"
+                  className="mr-2 text-gray-600 whitespace-nowrap"
+                >
                   Sort by:
                 </label>
                 <select
@@ -249,12 +272,12 @@ const GuestOffers = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {renderOfferCards()}
         </div>
       </section>
-      
+
       <Footer />
     </div>
   );
