@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { forgotPasswordValidation } from "../validation/formValidation";
 import { useNavigate, Link } from "react-router-dom";
 import loginBg from "../../assets/img/login_bg.jpg";
 import { FaArrowLeft } from "react-icons/fa";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const ForgotPassword = () => {
   const {
@@ -12,8 +14,24 @@ const ForgotPassword = () => {
     formState: { errors },
   } = useForm();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit = (data) => console.log("Reset Password Request:", data);
+  const onSubmit = async (data) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.post("/user/forgot-password", {
+        email: data.email
+      });
+
+      toast.success("Password reset link sent to your email!");
+      console.log("Reset Password Response:", response.data);
+    } catch (error) {
+      console.error("Reset Password Error:", error.response?.data || error.message);
+      toast.error(error.response?.data?.message || "Failed to send reset link");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div
@@ -47,9 +65,20 @@ const ForgotPassword = () => {
 
           <button
             type="submit"
-            className="mt-4 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-all"
+            className="mt-4 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-all flex justify-center items-center"
+            disabled={isLoading}
           >
-            Reset Password
+            {isLoading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Sending...
+              </>
+            ) : (
+              "Reset Password"
+            )}
           </button>
 
           <p className="mt-3 text-center text-sm text-white">

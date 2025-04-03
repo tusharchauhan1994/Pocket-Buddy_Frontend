@@ -3,6 +3,9 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import RestaurantSidebar from "./RestaurantSidebar";
 import { toast } from "react-toastify";
+import { FiEdit2, FiTrash2, FiSave, FiX, FiPlus } from "react-icons/fi";
+import { BsFilter, BsSearch } from "react-icons/bs";
+import { FaPercentage, FaRupeeSign } from "react-icons/fa";
 
 export const RestaurantOffers = () => {
   const [offers, setOffers] = useState([]);
@@ -12,7 +15,11 @@ export const RestaurantOffers = () => {
   );
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [loading, setLoading] = useState(false);
 
+  // Edit handlers
   const handleEdit = (offer) => {
     setEditingId(offer._id);
     setEditData({
@@ -20,18 +27,19 @@ export const RestaurantOffers = () => {
       description: offer.description || "",
       offer_type: offer.offer_type || "Flat Discount",
       discount_value: offer.discount_value || "",
-      valid_from: offer.valid_from || "",
-      valid_to: offer.valid_to || "",
+      valid_from: offer.valid_from?.split("T")[0] || "",
+      valid_to: offer.valid_to?.split("T")[0] || "",
       requires_approval: offer.requires_approval || false,
       min_order_value: offer.min_order_value || "",
       max_redemptions: offer.max_redemptions || "",
       status: offer.status || "Active",
-      image: offer.image || null,
     });
   };
 
   const handleChange = (e, field) => {
-    setEditData({ ...editData, [field]: e.target.value });
+    const value =
+      field === "requires_approval" ? e.target.checked : e.target.value;
+    setEditData({ ...editData, [field]: value });
   };
 
   const handleCancel = () => {
@@ -40,14 +48,9 @@ export const RestaurantOffers = () => {
   };
 
   const handleSave = async (id) => {
-    if (!window.confirm("Are you sure you want to save these changes?")) return;
-
+    setLoading(true);
     try {
-      const res = await axios.put(
-        `http://localhost:3000/offer/update/${id}`,
-        editData
-      ); // Ensure URL is correct
-
+      const res = await axios.put(`/offer/update/${id}`, editData);
       if (res.data.success) {
         setOffers((prev) =>
           prev.map((offer) =>
@@ -56,374 +59,385 @@ export const RestaurantOffers = () => {
         );
         setEditingId(null);
         toast.success("Offer updated successfully!");
-      } else {
-        toast.error("Failed to update offer.");
       }
     } catch (error) {
-      console.error("Error updating offer:", error);
       toast.error("Failed to update offer.");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this offer?")) return;
-
+    setLoading(true);
     try {
-      const res = await axios.delete(
-        `http://localhost:3000/offer/delete/${id}`
-      ); // Add full URL if needed
-
+      const res = await axios.delete(`/offer/delete/${id}`);
       if (res.data.success) {
         setOffers((prev) => prev.filter((offer) => offer._id !== id));
         toast.success("Offer deleted successfully!");
-      } else {
-        toast.error("Failed to delete offer.");
       }
     } catch (error) {
-      console.error("Error deleting offer:", error);
       toast.error("Failed to delete offer.");
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Data fetching
   const userId = localStorage.getItem("id");
-  // ✅ Fetch the logged-in user's restaurants
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/admin/restaurants");
-        if (res.data.data && Array.isArray(res.data.data)) {
-          // Extract restaurants belonging to the logged-in user
-          const userRestaurants = res.data.data
-            .flatMap((owner) => owner.restaurants)
-            .filter((restaurant) => restaurant.userId === userId);
+        const res = await axios.get("/admin/restaurants");
+        const userRestaurants =
+          res.data.data
+            ?.flatMap((owner) => owner.restaurants)
+            ?.filter((restaurant) => restaurant.userId === userId) || [];
 
-          setRestaurants(userRestaurants);
-          console.log("✅ User's Restaurants:", userRestaurants);
-
-          // Automatically select the first restaurant if none is selected
-          if (!selectedRestaurantId && userRestaurants.length > 0) {
-            setSelectedRestaurantId(userRestaurants[0]._id);
-            localStorage.setItem("restaurantId", userRestaurants[0]._id);
-          }
-        } else {
-          toast.error("Failed to load restaurants");
+        setRestaurants(userRestaurants);
+        if (!selectedRestaurantId && userRestaurants.length > 0) {
+          setSelectedRestaurantId(userRestaurants[0]._id);
+          localStorage.setItem("restaurantId", userRestaurants[0]._id);
         }
       } catch (error) {
-        console.error("❌ Error fetching restaurants:", error);
         toast.error("Error fetching restaurants.");
       }
     };
-
     fetchRestaurants();
   }, [userId]);
 
-  // ✅ Fetch offers for the selected restaurant
   useEffect(() => {
-    if (!selectedRestaurantId) {
-      console.warn("❌ No restaurant selected.");
-      return;
-    }
+    if (!selectedRestaurantId) return;
 
     const fetchOffers = async () => {
+      setLoading(true);
       try {
-        console.log("Fetching offers for Restaurant ID:", selectedRestaurantId);
         const res = await axios.get(
           `/offer/by-restaurant/${selectedRestaurantId}`
         );
-
-        if (res.data && res.data.success) {
+        if (res.data?.success) {
           setOffers(res.data.offers);
-          console.log("✅ Fetched Offers:", res.data.offers);
-        } else {
-          console.error("❌ Invalid API response:", res.data);
-          toast.error("Failed to load offers.");
         }
       } catch (error) {
-        console.error("❌ Error fetching offers:", error);
         toast.error("Error fetching offers.");
+      } finally {
+        setLoading(false);
       }
     };
-
     fetchOffers();
   }, [selectedRestaurantId]);
 
-  // ✅ Handle restaurant selection change
   const handleRestaurantChange = (e) => {
     const newRestaurantId = e.target.value;
     setSelectedRestaurantId(newRestaurantId);
     localStorage.setItem("restaurantId", newRestaurantId);
-    console.log("✅ Restaurant ID Updated:", newRestaurantId);
   };
 
+  // Filter and search
+  const filteredOffers = offers.filter((offer) => {
+    const matchesSearch =
+      searchTerm === "" ||
+      offer.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      offer.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "All" || offer.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   return (
-    <div className="flex min-h-screen">
-      <div className="w-64 flex-shrink-0">
-        <RestaurantSidebar />
-      </div>
+    <div className="flex min-h-screen bg-gray-50">
+      <RestaurantSidebar />
 
       <div className="flex-grow p-6">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <h2 className="text-2xl font-bold text-gray-800">Manage Offers</h2>
-          <Link to="/restaurant/addOffer">
-            <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-              Add New Offer
-            </button>
-          </Link>
+          <div className="flex gap-3">
+            <Link to="/restaurant/addOffer" className="btn-primary">
+              <FiPlus className="mr-1" /> Add New Offer
+            </Link>
+          </div>
         </div>
 
-        {/* ✅ Restaurant selection dropdown */}
-        <div className="mb-4">
-          <label className="block text-lg font-medium text-gray-700">
-            Select Restaurant:
-          </label>
-          <select
-            value={selectedRestaurantId}
-            onChange={handleRestaurantChange}
-            className="mt-1 p-2 border rounded w-full"
-          >
-            {restaurants.length > 0 ? (
-              restaurants.map((restaurant) => (
-                <option key={restaurant._id} value={restaurant._id}>
-                  {restaurant.title}
-                </option>
-              ))
-            ) : (
-              <option disabled>No restaurants available</option>
-            )}
-          </select>
+        {/* Filters and Restaurant Selection */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Select Restaurant
+            </label>
+            <select
+              value={selectedRestaurantId}
+              onChange={handleRestaurantChange}
+              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+              disabled={loading}
+            >
+              {restaurants.length > 0 ? (
+                restaurants.map((restaurant) => (
+                  <option key={restaurant._id} value={restaurant._id}>
+                    {restaurant.title}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No restaurants available</option>
+              )}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Search Offers
+            </label>
+            <div className="relative">
+              <BsSearch className="absolute left-3 top-3 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search offers..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Filter by Status
+            </label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+              disabled={loading}
+            >
+              <option value="All">All Statuses</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
         </div>
 
-        {/* ✅ Offers Table with Edit & Delete */}
-        <div className="overflow-x-auto">
-          <table className="w-full border bg-white shadow-md rounded-lg">
-            <thead className="bg-gray-800 text-white">
-              <tr>
-                <th className="p-3 text-left">#</th>
-                <th className="p-3 text-left">Image</th>
-                <th className="p-3 text-left">Title</th>
-                <th className="p-3 text-left">Description</th>
-                <th className="p-3 text-left">Offer Type</th>
-                <th className="p-3 text-left">Discount</th>
-                <th className="p-3 text-left">Valid From</th>
-                <th className="p-3 text-left">Valid Until</th>
-                <th className="p-3 text-left">Min Order Value</th>
-                <th className="p-3 text-left">Max Redemptions</th>
-                <th className="p-3 text-left">Requires Approval</th>
-                <th className="p-3 text-left">Status</th>
-                <th className="p-3 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {offers.length > 0 ? (
-                offers.map((offer, index) => (
-                  <tr key={offer._id} className="border-b hover:bg-gray-100">
-                    <td className="p-3">{index + 1}</td>
-                    <td className="p-3">
-                      <img
-                        src={offer.imageURL}
-                        alt={offer.title}
-                        className="h-16 w-16 object-cover rounded"
-                      />
+        {/* Offers Table */}
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Title
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Type
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Discount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Validity
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {loading ? (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-4 text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
                     </td>
-                    <td className="p-3">
-                      {editingId === offer._id ? (
-                        <input
-                          type="text"
-                          value={editData.title}
-                          onChange={(e) => handleChange(e, "title")}
-                          onKeyDown={(e) =>
-                            e.key === "Enter" && handleSave(offer._id)
-                          }
-                          className="border p-1"
-                        />
-                      ) : (
-                        offer.title
-                      )}
-                    </td>
-                    <td className="p-3">
-                      {editingId === offer._id ? (
-                        <textarea
-                          value={editData.description}
-                          onChange={(e) => handleChange(e, "description")}
-                          onKeyDown={(e) =>
-                            e.key === "Enter" && handleSave(offer._id)
-                          }
-                          className="border p-1 w-full"
-                        />
-                      ) : (
-                        offer.description
-                      )}
-                    </td>
-                    <td className="p-3">
-                      {editingId === offer._id ? (
-                        <select
-                          value={editData.offer_type}
-                          onChange={(e) => handleChange(e, "offer_type")}
-                          className="border p-1"
-                        >
-                          <option value="Flat Discount">Flat Discount</option>
-                          <option value="Percentage Discount">
-                            Percentage Discount
-                          </option>
-                        </select>
-                      ) : (
-                        offer.offer_type
-                      )}
-                    </td>
-                    <td className="p-3">
-                      {editingId === offer._id ? (
-                        <input
-                          type="number"
-                          value={editData.discount_value}
-                          onChange={(e) => handleChange(e, "discount_value")}
-                          onKeyDown={(e) =>
-                            e.key === "Enter" && handleSave(offer._id)
-                          }
-                          className="border p-1 w-16"
-                        />
-                      ) : (
-                        `${offer.discount_value}%`
-                      )}
-                    </td>
-                    <td className="p-3">
-                      {editingId === offer._id ? (
-                        <input
-                          type="date"
-                          value={editData.valid_from}
-                          onChange={(e) => handleChange(e, "valid_from")}
-                          onKeyDown={(e) =>
-                            e.key === "Enter" && handleSave(offer._id)
-                          }
-                          className="border p-1"
-                        />
-                      ) : (
-                        new Date(offer.valid_from).toLocaleDateString()
-                      )}
-                    </td>
-                    <td className="p-3">
-                      {editingId === offer._id ? (
-                        <input
-                          type="date"
-                          value={editData.valid_to}
-                          onChange={(e) => handleChange(e, "valid_to")}
-                          onKeyDown={(e) =>
-                            e.key === "Enter" && handleSave(offer._id)
-                          }
-                          className="border p-1"
-                        />
-                      ) : (
-                        new Date(offer.valid_to).toLocaleDateString()
-                      )}
-                    </td>
-                    <td className="p-3">
-                      {editingId === offer._id ? (
-                        <input
-                          type="number"
-                          value={editData.min_order_value}
-                          onChange={(e) => handleChange(e, "min_order_value")}
-                          className="border p-1 w-20"
-                        />
-                      ) : (
-                        offer.min_order_value
-                      )}
-                    </td>
-                    <td className="p-3">
-                      {editingId === offer._id ? (
-                        <input
-                          type="number"
-                          value={editData.max_redemptions}
-                          onChange={(e) => handleChange(e, "max_redemptions")}
-                          className="border p-1 w-20"
-                        />
-                      ) : (
-                        offer.max_redemptions
-                      )}
-                    </td>
-                    <td className="p-3">
-                      {editingId === offer._id ? (
-                        <input
-                          type="checkbox"
-                          checked={editData.requires_approval}
-                          onChange={(e) =>
-                            handleChange(
-                              { target: { value: e.target.checked } },
-                              "requires_approval"
-                            )
-                          }
-                          className="border p-1"
-                        />
-                      ) : offer.requires_approval ? (
-                        "Yes"
-                      ) : (
-                        "No"
-                      )}
-                    </td>
-                    <td className="p-3">
-                      {editingId === offer._id ? (
-                        <select
-                          value={editData.status}
-                          onChange={(e) => handleChange(e, "status")}
-                          className="border p-1"
-                        >
-                          <option value="Active">Active</option>
-                          <option value="Inactive">Inactive</option>
-                        </select>
-                      ) : (
-                        <span
-                          className={`px-2 py-1 rounded text-white ${
-                            offer.status === "Active"
-                              ? "bg-green-500"
-                              : "bg-red-500"
-                          }`}
-                        >
-                          {offer.status}
-                        </span>
-                      )}
-                    </td>
-                    <td className="p-3">
-                      <div className="flex flex-col space-y-2">
+                  </tr>
+                ) : filteredOffers.length > 0 ? (
+                  filteredOffers.map((offer) => (
+                    <tr key={offer._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10">
+                            <img
+                              className="h-10 w-10 rounded"
+                              src={offer.imageURL}
+                              alt={offer.title}
+                            />
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">
+                              {editingId === offer._id ? (
+                                <input
+                                  type="text"
+                                  value={editData.title}
+                                  onChange={(e) => handleChange(e, "title")}
+                                  className="border p-1 rounded w-full"
+                                />
+                              ) : (
+                                offer.title
+                              )}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {editingId === offer._id ? (
+                                <textarea
+                                  value={editData.description}
+                                  onChange={(e) =>
+                                    handleChange(e, "description")
+                                  }
+                                  className="border p-1 rounded w-full"
+                                  rows="2"
+                                />
+                              ) : (
+                                offer.description
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         {editingId === offer._id ? (
-                          <>
+                          <select
+                            value={editData.offer_type}
+                            onChange={(e) => handleChange(e, "offer_type")}
+                            className="border p-1 rounded"
+                          >
+                            <option value="Flat Discount">Flat Discount</option>
+                            <option value="Percentage Discount">
+                              Percentage
+                            </option>
+                          </select>
+                        ) : (
+                          offer.offer_type
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {editingId === offer._id ? (
+                          <div className="flex items-center">
+                            <input
+                              type="number"
+                              value={editData.discount_value}
+                              onChange={(e) =>
+                                handleChange(e, "discount_value")
+                              }
+                              className="border p-1 rounded w-20"
+                            />
+                            <span className="ml-1">
+                              {editData.offer_type === "Percentage Discount" ? (
+                                <FaPercentage className="text-gray-500" />
+                              ) : (
+                                <FaRupeeSign className="text-gray-500" />
+                              )}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center">
+                            {offer.discount_value}
+                            {offer.offer_type === "Percentage Discount" ? (
+                              <FaPercentage className="ml-1 text-gray-500" />
+                            ) : (
+                              <FaRupeeSign className="ml-1 text-gray-500" />
+                            )}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {editingId === offer._id ? (
+                          <div className="flex flex-col gap-2">
+                            <input
+                              type="date"
+                              value={editData.valid_from}
+                              onChange={(e) => handleChange(e, "valid_from")}
+                              className="border p-1 rounded"
+                            />
+                            <span className="text-center">to</span>
+                            <input
+                              type="date"
+                              value={editData.valid_to}
+                              onChange={(e) => handleChange(e, "valid_to")}
+                              className="border p-1 rounded"
+                            />
+                          </div>
+                        ) : (
+                          <div className="text-sm text-gray-900">
+                            {formatDate(offer.valid_from)} to{" "}
+                            {formatDate(offer.valid_to)}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {editingId === offer._id ? (
+                          <select
+                            value={editData.status}
+                            onChange={(e) => handleChange(e, "status")}
+                            className="border p-1 rounded"
+                          >
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                          </select>
+                        ) : (
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              offer.status === "Active"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {offer.status}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        {editingId === offer._id ? (
+                          <div className="flex gap-2">
                             <button
                               onClick={() => handleSave(offer._id)}
-                              className="px-4 py-1 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition"
+                              className="text-green-600 hover:text-green-900 flex items-center"
+                              disabled={loading}
                             >
-                              Save
+                              <FiSave className="mr-1" /> Save
                             </button>
                             <button
                               onClick={handleCancel}
-                              className="px-4 py-1 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600 transition"
+                              className="text-gray-600 hover:text-gray-900 flex items-center"
                             >
-                              Cancel
+                              <FiX className="mr-1" /> Cancel
                             </button>
-                          </>
+                          </div>
                         ) : (
                           <button
                             onClick={() => handleEdit(offer)}
-                            className="px-4 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+                            className="text-blue-600 hover:text-blue-900 flex items-center"
                           >
-                            Edit
+                            <FiEdit2 className="mr-1" /> Edit
                           </button>
                         )}
                         <button
                           onClick={() => handleDelete(offer._id)}
-                          className="px-4 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+                          className="text-red-600 hover:text-red-900 flex items-center mt-1"
                         >
-                          Delete
+                          <FiTrash2 className="mr-1" /> Delete
                         </button>
-                      </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="6"
+                      className="px-6 py-4 text-center text-gray-500"
+                    >
+                      No offers found
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="7" className="p-4 text-center text-gray-500">
-                    No offers found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

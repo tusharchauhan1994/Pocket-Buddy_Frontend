@@ -6,13 +6,12 @@ import RestaurantSidebar from "./RestaurantSidebar";
 import { toast } from "react-toastify";
 import { Loader } from "../common/Loader";
 
-
-
 export const AddRestaurant = () => {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [areas, setAreas] = useState([]);
   const [foodTypes, setFoodTypes] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     axios.get("/state/getallstates").then((res) => setStates(res.data.data));
@@ -31,10 +30,16 @@ export const AddRestaurant = () => {
     setAreas(res.data.data);
   };
 
-  const { register, handleSubmit } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm({
+    mode: "onChange",
+  });
+
   const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const submitHandler = async (data) => {
     setIsLoading(true);
@@ -55,6 +60,22 @@ export const AddRestaurant = () => {
     setIsLoading(false);
   };
 
+  // Watch state and city to trigger city/area updates
+  const selectedState = watch("stateId");
+  const selectedCity = watch("cityId");
+
+  useEffect(() => {
+    if (selectedState) {
+      getCityByStateId(selectedState);
+    }
+  }, [selectedState]);
+
+  useEffect(() => {
+    if (selectedCity) {
+      getAreaByCityId(selectedCity);
+    }
+  }, [selectedCity]);
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar - Visible on large screens */}
@@ -62,107 +83,326 @@ export const AddRestaurant = () => {
         <RestaurantSidebar />
       </div>
 
-      {/* ✅ Full-Screen Loader Overlay */}
-      {(isLoading || isSubmitting) && (
+      {/* Full-Screen Loader Overlay */}
+      {isLoading && (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 backdrop-blur-lg z-50">
           <Loader />
         </div>
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex justify-center items-center">
-        <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-4xl">
-          <h1 className="text-3xl font-bold text-center mb-6">
+      <div className="flex-1 p-4 overflow-auto">
+        <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-4xl mx-auto">
+          <h1 className="text-2xl md:text-3xl font-bold text-center mb-6">
             Add Restaurant
           </h1>
           <form
             onSubmit={handleSubmit(submitHandler)}
-            className="space-y-5"
+            className="space-y-4"
             encType="multipart/form-data"
           >
-            {/* Input Fields */}
-            {[
-              { label: "Restaurant Name", name: "title" },
-              { label: "Category", name: "category" },
-              { label: "Description", name: "description", type: "textarea" },
-              { label: "Timings", name: "timings" },
-              { label: "Contact Number", name: "contactNumber" },
-              { label: "Address", name: "address", type: "textarea" },
-              { label: "Latitude", name: "latitude" },
-              { label: "Longitude", name: "longitude" },
-            ].map(({ label, name, type }) => (
-              <div key={name} className="flex flex-col">
-                <label className="font-medium">{label}</label>
-                {type === "textarea" ? (
-                  <textarea
-                    {...register(name)}
-                    className="border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                ) : (
-                  <input
-                    type="text"
-                    {...register(name)}
-                    className="border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
+            {/* First Row - Name and Category */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col">
+                <label className="font-medium mb-1">Restaurant Name*</label>
+                <input
+                  type="text"
+                  {...register("title", { required: "Name is required" })}
+                  className={`border rounded-md p-2 ${
+                    errors.title ? "border-red-500" : "border-gray-300"
+                  } focus:ring-2 focus:ring-blue-500`}
+                />
+                {errors.title && (
+                  <span className="text-red-500 text-sm">
+                    {errors.title.message}
+                  </span>
                 )}
               </div>
-            ))}
 
-            {/* Dropdowns */}
-            {[
-              {
-                label: "State",
-                name: "stateId",
-                options: states,
-                onChange: getCityByStateId,
-              },
-              {
-                label: "City",
-                name: "cityId",
-                options: cities,
-                onChange: getAreaByCityId,
-              },
-              { label: "Area", name: "areaId", options: areas },
-              { label: "Food Type", name: "foodTypeId", options: foodTypes },
-            ].map(({ label, name, options, onChange }) => (
-              <div key={name} className="flex flex-col">
-                <label className="font-medium">{label}</label>
+              <div className="flex flex-col">
+                <label className="font-medium mb-1">Category*</label>
+                <input
+                  type="text"
+                  {...register("category", {
+                    required: "Category is required",
+                  })}
+                  className={`border rounded-md p-2 ${
+                    errors.category ? "border-red-500" : "border-gray-300"
+                  } focus:ring-2 focus:ring-blue-500`}
+                />
+                {errors.category && (
+                  <span className="text-red-500 text-sm">
+                    {errors.category.message}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="flex flex-col">
+              <label className="font-medium mb-1">Description*</label>
+              <textarea
+                {...register("description", {
+                  required: "Description is required",
+                  minLength: {
+                    value: 20,
+                    message: "Description should be at least 20 characters",
+                  },
+                })}
+                rows={1}
+                className={`border rounded-md p-2 ${
+                  errors.description ? "border-red-500" : "border-gray-300"
+                } focus:ring-2 focus:ring-blue-500`}
+              />
+              {errors.description && (
+                <span className="text-red-500 text-sm">
+                  {errors.description.message}
+                </span>
+              )}
+            </div>
+
+            {/* Second Row - Timings and Contact */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col">
+                <label className="font-medium mb-1">Timings*</label>
+                <input
+                  type="text"
+                  {...register("timings", { required: "Timings are required" })}
+                  placeholder="e.g. 10:00 AM - 10:00 PM"
+                  className={`border rounded-md p-2 ${
+                    errors.timings ? "border-red-500" : "border-gray-300"
+                  } focus:ring-2 focus:ring-blue-500`}
+                />
+                {errors.timings && (
+                  <span className="text-red-500 text-sm">
+                    {errors.timings.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-col">
+                <label className="font-medium mb-1">Contact Number*</label>
+                <input
+                  type="tel"
+                  {...register("contactNumber", {
+                    required: "Contact number is required",
+                    pattern: {
+                      value: /^[0-9]{10}$/,
+                      message: "Please enter a valid 10-digit phone number",
+                    },
+                  })}
+                  className={`border rounded-md p-2 ${
+                    errors.contactNumber ? "border-red-500" : "border-gray-300"
+                  } focus:ring-2 focus:ring-blue-500`}
+                />
+                {errors.contactNumber && (
+                  <span className="text-red-500 text-sm">
+                    {errors.contactNumber.message}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Address */}
+            <div className="flex flex-col">
+              <label className="font-medium mb-1">Address*</label>
+              <textarea
+                {...register("address", { required: "Address is required" })}
+                rows={1}
+                className={`border rounded-md p-2 ${
+                  errors.address ? "border-red-500" : "border-gray-300"
+                } focus:ring-2 focus:ring-blue-500`}
+              />
+              {errors.address && (
+                <span className="text-red-500 text-sm">
+                  {errors.address.message}
+                </span>
+              )}
+            </div>
+
+            {/* Third Row - Coordinates */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col">
+                <label className="font-medium mb-1">Latitude*</label>
+                <input
+                  type="number"
+                  step="any"
+                  {...register("latitude", {
+                    required: "Latitude is required",
+                    min: { value: -90, message: "Minimum latitude is -90" },
+                    max: { value: 90, message: "Maximum latitude is 90" },
+                  })}
+                  className={`border rounded-md p-2 ${
+                    errors.latitude ? "border-red-500" : "border-gray-300"
+                  } focus:ring-2 focus:ring-blue-500`}
+                />
+                {errors.latitude && (
+                  <span className="text-red-500 text-sm">
+                    {errors.latitude.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-col">
+                <label className="font-medium mb-1">Longitude*</label>
+                <input
+                  type="number"
+                  step="any"
+                  {...register("longitude", {
+                    required: "Longitude is required",
+                    min: { value: -180, message: "Minimum longitude is -180" },
+                    max: { value: 180, message: "Maximum longitude is 180" },
+                  })}
+                  className={`border rounded-md p-2 ${
+                    errors.longitude ? "border-red-500" : "border-gray-300"
+                  } focus:ring-2 focus:ring-blue-500`}
+                />
+                {errors.longitude && (
+                  <span className="text-red-500 text-sm">
+                    {errors.longitude.message}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Location Dropdowns */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex flex-col">
+                <label className="font-medium mb-1">State*</label>
                 <select
-                  {...register(name)}
-                  className="border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-blue-500"
-                  required
-                  onChange={(e) => onChange && onChange(e.target.value)}
+                  {...register("stateId", { required: "State is required" })}
+                  className={`border rounded-md p-2 ${
+                    errors.stateId ? "border-red-500" : "border-gray-300"
+                  } focus:ring-2 focus:ring-blue-500`}
                 >
-                  <option value="">SELECT {label.toUpperCase()}</option>
-                  {options.map((option) => (
-                    <option key={option._id} value={option._id}>
-                      {option.name || option.foodTypeName}
+                  <option value="">SELECT STATE</option>
+                  {states.map((state) => (
+                    <option key={state._id} value={state._id}>
+                      {state.name}
                     </option>
                   ))}
                 </select>
+                {errors.stateId && (
+                  <span className="text-red-500 text-sm">
+                    {errors.stateId.message}
+                  </span>
+                )}
               </div>
-            ))}
 
-            {/* Image Upload */}
-            <div className="flex flex-col">
-              <label className="font-medium">Add Image</label>
-              <input
-                type="file"
-                {...register("image")}
-                className="border border-gray-300 rounded-md p-3"
-                required
-              />
+              <div className="flex flex-col">
+                <label className="font-medium mb-1">City*</label>
+                <select
+                  {...register("cityId", {
+                    required: "City is required",
+                    disabled: !selectedState,
+                  })}
+                  className={`border rounded-md p-2 ${
+                    errors.cityId ? "border-red-500" : "border-gray-300"
+                  } focus:ring-2 focus:ring-blue-500`}
+                >
+                  <option value="">SELECT CITY</option>
+                  {cities.map((city) => (
+                    <option key={city._id} value={city._id}>
+                      {city.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.cityId && (
+                  <span className="text-red-500 text-sm">
+                    {errors.cityId.message}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-col">
+                <label className="font-medium mb-1">Area*</label>
+                <select
+                  {...register("areaId", {
+                    required: "Area is required",
+                    disabled: !selectedCity,
+                  })}
+                  className={`border rounded-md p-2 ${
+                    errors.areaId ? "border-red-500" : "border-gray-300"
+                  } focus:ring-2 focus:ring-blue-500`}
+                >
+                  <option value="">SELECT AREA</option>
+                  {areas.map((area) => (
+                    <option key={area._id} value={area._id}>
+                      {area.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.areaId && (
+                  <span className="text-red-500 text-sm">
+                    {errors.areaId.message}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Food Type */}
+              <div className="flex flex-col">
+                <label className="font-medium mb-1">Food Type*</label>
+                <select
+                  {...register("foodTypeId", {
+                    required: "Food type is required",
+                  })}
+                  className={`border rounded-md p-2 ${
+                    errors.foodTypeId ? "border-red-500" : "border-gray-300"
+                  } focus:ring-2 focus:ring-blue-500`}
+                >
+                  <option value="">SELECT FOOD TYPE</option>
+                  {foodTypes.map((type) => (
+                    <option key={type._id} value={type._id}>
+                      {type.foodTypeName}
+                    </option>
+                  ))}
+                </select>
+                {errors.foodTypeId && (
+                  <span className="text-red-500 text-sm">
+                    {errors.foodTypeId.message}
+                  </span>
+                )}
+              </div>
+
+              {/* Image Upload */}
+              <div className="flex flex-col">
+                <label className="font-medium mb-1">Restaurant Image*</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  {...register("image", {
+                    required: "Image is required",
+                    validate: {
+                      lessThan10MB: (files) =>
+                        files[0]?.size < 10000000 || "Maximum 10MB",
+                      acceptedFormats: (files) =>
+                        ["image/jpeg", "image/png", "image/jpg"].includes(
+                          files[0]?.type
+                        ) || "Only JPEG, JPG, PNG",
+                    },
+                  })}
+                  className={`border rounded-md p-2 ${
+                    errors.image ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                {errors.image && (
+                  <span className="text-red-500 text-sm">
+                    {errors.image.message}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Submit Button */}
-            <div className="flex justify-center">
+            <div className="pt-4">
               <button
                 type="submit"
-                className="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 transition"
+                disabled={isLoading}
+                className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
               >
-                Submit
+                {isLoading ? "Processing..." : "Add Restaurant"}
               </button>
             </div>
           </form>

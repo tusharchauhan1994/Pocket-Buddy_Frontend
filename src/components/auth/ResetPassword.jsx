@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { FaArrowLeft, FaEye, FaEyeSlash } from "react-icons/fa";
 import { Loader } from "../common/Loader";
@@ -10,6 +10,8 @@ const ResetPassword = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isValidToken, setIsValidToken] = useState(false);
+  const [token, setToken] = useState(null);
   const {
     register,
     handleSubmit,
@@ -17,27 +19,73 @@ const ResetPassword = () => {
     formState: { errors },
   } = useForm();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  // const { token } = useParams();
-  console.log("Token from URL:", token);
+  useEffect(() => {
+    const tokenFromUrl = searchParams.get('token');
+    
+    if (!tokenFromUrl) {
+      toast.error("Invalid or missing reset token");
+      navigate("/forgot-password");
+      return;
+    }
+
+    // Basic token validation
+    if (tokenFromUrl && tokenFromUrl.length > 30) {
+      setToken(tokenFromUrl);
+      setIsValidToken(true);
+    } else {
+      toast.error("Invalid reset token format");
+      navigate("/forgot-password");
+    }
+  }, [searchParams, navigate]);
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
+    
     try {
-      const res = await axios.post(`/auth/reset-password/${token}`, data);
-      if (res.status === 200) {
-        toast.success("Password reset successfully");
-        navigate("/login");
-      } else {
-        toast.error("Failed to reset password");
-      }
+      const response = await axios.post(
+        "http://localhost:3000/user/reset-password", // Full URL to avoid confusion
+        {
+          token: token,
+          password: data.password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      toast.success("Password reset successfully!");
+      navigate("/login");
     } catch (error) {
-      console.error("Reset Password Error:", error);
-      toast.error("An error occurred. Please try again.");
+      console.error("API Error:", error);
+      toast.error(error.response?.data?.message || "Failed to reset password");
+      if (error.response?.status === 401) {
+        navigate("/forgot-password");
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (!isValidToken) {
+    return (
+      <div className="relative flex justify-center items-center h-screen bg-gray-100">
+        <div className="bg-white p-6 rounded-lg shadow-lg w-[350px] sm:w-[400px] text-center">
+          <h2 className="text-2xl font-bold text-center mb-4">Invalid Link</h2>
+          <p className="mb-4">The password reset link is invalid or has expired.</p>
+          <button
+            onClick={() => navigate("/forgot-password")}
+            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-all text-sm"
+          >
+            Request New Link
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex justify-center items-center h-screen bg-gray-100">
@@ -60,7 +108,6 @@ const ResetPassword = () => {
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          {/* New Password */}
           <label className="block font-medium text-sm">New Password</label>
           <div className="relative">
             <input
@@ -73,6 +120,7 @@ const ResetPassword = () => {
                 },
               })}
               className="w-full border p-2 rounded bg-gray-100 text-sm pr-10"
+              autoComplete="new-password"
             />
             <span
               className="absolute top-3 right-3 cursor-pointer text-gray-600"
@@ -85,7 +133,6 @@ const ResetPassword = () => {
             <p className="text-red-500 text-xs">{errors.password.message}</p>
           )}
 
-          {/* Confirm Password */}
           <label className="block font-medium text-sm mt-2">
             Confirm Password
           </label>
@@ -98,6 +145,7 @@ const ResetPassword = () => {
                   value === watch("password") || "Passwords do not match",
               })}
               className="w-full border p-2 rounded bg-gray-100 text-sm pr-10"
+              autoComplete="new-password"
             />
             <span
               className="absolute top-3 right-3 cursor-pointer text-gray-600"
@@ -117,7 +165,7 @@ const ResetPassword = () => {
             className="mt-4 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-all text-sm"
             disabled={isSubmitting}
           >
-            Reset Password
+            {isSubmitting ? "Processing..." : "Reset Password"}
           </button>
         </form>
       </div>
