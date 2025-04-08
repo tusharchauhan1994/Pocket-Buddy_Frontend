@@ -127,14 +127,14 @@ export const columns = (getAllUsers, setUsers) => [
     sortable: false,
     renderCell: (params) => (
       <>
-        <Tooltip title="Edit">
+        {/* <Tooltip title="Edit">
           <IconButton
             onClick={() => handleEdit(params.row._id)}
             color="primary"
           >
             <Edit />
           </IconButton>
-        </Tooltip>
+        </Tooltip> */}
         <Tooltip title="Delete">
           <IconButton
             onClick={() => handleDelete(params.row._id, getAllUsers)}

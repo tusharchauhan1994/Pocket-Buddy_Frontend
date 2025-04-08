@@ -1,13 +1,52 @@
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, Button, Box, Typography, CircularProgress, Alert, Chip, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
-import { TextField } from "@mui/material";
-import { FaSortAlphaDown, FaSortAlphaUp, FaThLarge, FaList, FaEdit, FaTrash } from "react-icons/fa";
-import { MdOutlineCategory, MdPerson, MdPhone, MdAccessTime, MdLocationOn, MdLocalOffer, MdStar } from "react-icons/md";
+import { 
+  Card, 
+  CardContent, 
+  Button, 
+  Box, 
+  Typography, 
+  CircularProgress, 
+  Alert, 
+  Chip, 
+  MenuItem, 
+  Select, 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableContainer, 
+  TableHead, 
+  TableRow, 
+  Paper,
+  TextField,
+  Avatar,
+  IconButton,
+  Divider,
+  Badge,
+  Collapse
+} from "@mui/material";
+import { 
+  Sort as SortIcon,
+  GridView as GridViewIcon,
+  TableRows as TableRowsIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  ExpandMore as ExpandMoreIcon,
+  Category as CategoryIcon,
+  Person as PersonIcon,
+  Phone as PhoneIcon,
+  Schedule as ScheduleIcon,
+  LocationOn as LocationIcon,
+  LocalOffer as OfferIcon,
+  Star as StarIcon,
+  Refresh as RefreshIcon,
+  Check as CheckIcon,
+  Close as CloseIcon
+} from "@mui/icons-material";
 import axios from "axios";
 import AdminSidebar from "./AdminSidebar";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css"; // Ensure styles are included
+import "react-toastify/dist/ReactToastify.css";
 
 export default function ManageRestaurants() {
   const [restaurants, setRestaurants] = useState([]);
@@ -19,51 +58,50 @@ export default function ManageRestaurants() {
   const [viewMode, setViewMode] = useState("grid");
   const [editingId, setEditingId] = useState(null);
   const [editField, setEditField] = useState({});
+  const [refreshCount, setRefreshCount] = useState(0);
 
   useEffect(() => {
     fetchRestaurants();
-  }, []);
+  }, [refreshCount]);
   
   const fetchRestaurants = async () => {
     try {
+      setLoading(true);
+      setError(null);
       const res = await axios.get("http://localhost:3000/admin/restaurants");
       if (res.data.data && Array.isArray(res.data.data)) {
         const allRestaurants = res.data.data.flatMap(owner =>
-          owner.restaurants.map(restaurant => ({ ...restaurant, ownerName: owner.name }))
+          owner.restaurants.map(restaurant => ({ 
+            ...restaurant, 
+            ownerName: owner.name,
+            id: restaurant._id
+          }))
         );
         setRestaurants(allRestaurants);
       } else {
         setError("Invalid response from server.");
       }
     } catch (error) {
-      setError("Failed to fetch restaurants. Please try again.");
+      setError(error.response?.data?.message || "Failed to fetch restaurants. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-  
 
-const handleDelete = async (id) => {
-  if (!window.confirm("Are you sure you want to delete this restaurant?")) {
-    return;
-  }
-
-  try {
-    await axios.delete(`http://localhost:3000/location/deleteRestaurant/${id}`);
-
-    toast.success("✅ Restaurant deleted successfully!", { position: "top-right", autoClose: 2000 });
-
-    if (typeof fetchRestaurants === "function") {
-      await fetchRestaurants(); // ✅ Ensure the function is available
-    } else {
-      console.error("❌ fetchRestaurants is not available.");
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this restaurant?")) {
+      return;
     }
-  } catch (error) {
-    toast.error("❌ Failed to delete restaurant!", { position: "top-right", autoClose: 2000 });
-    console.error("❌ Error deleting restaurant:", error);
-  }
-};
 
+    try {
+      await axios.delete(`http://localhost:3000/location/deleteRestaurant/${id}`);
+      toast.success("Restaurant deleted successfully!", { position: "top-right", autoClose: 2000 });
+      setRefreshCount(prev => prev + 1);
+    } catch (error) {
+      toast.error("Failed to delete restaurant!", { position: "top-right", autoClose: 2000 });
+      console.error("Error deleting restaurant:", error);
+    }
+  };
 
   const handleEdit = (id, field, value) => {
     setEditingId(id);
@@ -71,31 +109,27 @@ const handleDelete = async (id) => {
   };
 
   const handleUpdate = async (id) => {
-    if (!window.confirm("Are you sure you want to update this restaurant?")) {
-      return;
-    }
-    
     try {
-      await axios.put(`http://localhost:3000/location/updateRestaurant/${id}`, { [editField.field]: editField.value });
-  
-      toast.success("✅ Updated successfully!", { position: "top-right", autoClose: 2000 });
-  
+      await axios.put(`http://localhost:3000/location/updateRestaurant/${id}`, { 
+        [editField.field]: editField.value 
+      });
+      toast.success("Updated successfully!", { position: "top-right", autoClose: 2000 });
       setEditingId(null);
-      
-      fetchRestaurants(); // ✅ Now fetchRestaurants is accessible
-  
+      setRefreshCount(prev => prev + 1);
     } catch (error) {
-      toast.error("❌ Update failed!", { position: "top-right", autoClose: 2000 });
-      console.error("❌ Error updating:", error);
+      toast.error("Update failed!", { position: "top-right", autoClose: 2000 });
+      console.error("Error updating:", error);
     }
   };
-  
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+  };
 
   const filteredRestaurants = restaurants.filter((res) => 
     res.title.toLowerCase().includes(search.toLowerCase())
   );
   
-  // Now apply sorting after filtering
   const sortedRestaurants = [...filteredRestaurants].sort((a, b) => {
     switch (sortType) {
       case "name-asc": return a.title.localeCompare(b.title);
@@ -105,109 +139,328 @@ const handleDelete = async (id) => {
       default: return 0;
     }
   });
-  
+
+  const getStatusChip = (status) => (
+    <Chip 
+      label={status ? "Active" : "Inactive"} 
+      color={status ? "success" : "error"} 
+      size="small" 
+      variant="outlined"
+    />
+  );
+
   return (
-    <div style={{ display: "flex" }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <AdminSidebar />
-      <Box p={3} flexGrow={1}>
-        <Typography variant="h6" fontWeight="bold">Manage Restaurants</Typography>
-        <div className="flex gap-4 mb-4">
-          <TextField placeholder="Search Restaurant..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-1/2" size="small" />
-          <Select value={sortType} onChange={(e) => setSortType(e.target.value)} size="small">
-            <MenuItem value="name-asc">Sort by Name (A-Z)</MenuItem>
-            <MenuItem value="name-desc">Sort by Name (Z-A)</MenuItem>
-            <MenuItem value="category">Sort by Category</MenuItem>
-            <MenuItem value="active">Sort by Status (Active First)</MenuItem>
-          </Select>
-          <Button onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}>
-            {viewMode === "grid" ? <FaList /> : <FaThLarge />} {viewMode === "grid" ? "List View" : "Grid View"}
-          </Button>
-        </div>
+      <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: '#f9f9f9' }}>
+        <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2, backgroundColor: 'white' }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            mb: 3,
+            flexWrap: 'wrap',
+            gap: 2
+          }}>
+            <Typography variant="h5" fontWeight="bold">
+              Manage Restaurants
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <TextField 
+                placeholder="Search restaurants..." 
+                value={search} 
+                onChange={(e) => setSearch(e.target.value)} 
+                size="small"
+                sx={{ width: 250 }}
+              />
+              <Select
+                value={sortType}
+                onChange={(e) => setSortType(e.target.value)}
+                size="small"
+                IconComponent={SortIcon}
+                sx={{ minWidth: 200 }}
+              >
+                <MenuItem value="name-asc">Name (A-Z)</MenuItem>
+                <MenuItem value="name-desc">Name (Z-A)</MenuItem>
+                <MenuItem value="category">Category</MenuItem>
+                <MenuItem value="active">Status (Active First)</MenuItem>
+              </Select>
+              <IconButton 
+                onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+                color="primary"
+              >
+                {viewMode === "grid" ? <TableRowsIcon /> : <GridViewIcon />}
+              </IconButton>
+              <IconButton 
+                onClick={() => setRefreshCount(prev => prev + 1)}
+                color="primary"
+              >
+                <RefreshIcon />
+              </IconButton>
+            </Box>
+          </Box>
 
-        {loading && <CircularProgress size={30} sx={{ alignSelf: "center" }} />}
-        {error && <Alert severity="error">{error}</Alert>}
+          {loading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
+              <CircularProgress size={50} />
+            </Box>
+          )}
 
-        {viewMode === "grid" ? (
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            {filteredRestaurants.map((res) => (
-              <motion.div key={res._id} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Card className="relative shadow-md rounded-lg overflow-hidden transition-transform p-2 h-full flex flex-col">
-                  <div className="w-full h-40 overflow-hidden relative">
-                    <img src={res.imageURL || "https://placehold.co/150"} alt={res.title || "No Title"} className="w-full h-full object-cover rounded-t-md" />
-                    <Chip label={res.active ? "Active" : "Inactive"} color={res.active ? "success" : "error"} className="absolute top-2 right-2" />
-                  </div>
-                  <CardContent className="p-3 flex flex-col flex-grow">
-                    <Typography variant="h6" fontWeight="bold" className="mb-1">{res.title || "No Title"}</Typography>
-                    <Typography variant="body2" color="textSecondary" className="mb-2 flex items-center gap-2"><MdOutlineCategory /> {res.category || "No Category"}</Typography>
-                    <Typography variant="body2" color="textSecondary" className="flex items-center gap-2"><MdPerson /> {res.ownerName || "Unknown"}</Typography>
-                    <Button variant="outlined" size="small" className="mt-3" onClick={() => setExpanded(expanded === res._id ? null : res._id)}>
-                      {expanded === res._id ? "Hide Details" : "Show More"}
-                    </Button>
-                    {expanded === res._id && (
-                      <div className="mt-3 border-t pt-2">
-                        <Typography variant="body2" color="textSecondary" className="flex items-center gap-2"><MdPhone /> {res.contactNumber || "N/A"}</Typography>
-                        <Typography variant="body2" color="textSecondary" className="flex items-center gap-2"><MdAccessTime /> {res.timings || "No timings provided"}</Typography>
-                        <Typography variant="body2" color="textSecondary" className="flex items-center gap-2"><MdLocationOn /> {res.address || "No address provided"}</Typography>
-                        <Typography variant="body2" color="textSecondary" className="flex items-center gap-2"><MdLocalOffer /> {res.offers?.length ? res.offers.join(", ") : "No Offers"}</Typography>
-                        <Typography variant="body2" color="textSecondary" className="flex items-center gap-2"><MdStar /> {res.reviews?.length ? res.reviews.map(r => `${r.user}: ${r.comment} (⭐${r.rating})`).join(" | ") : "No Reviews"}</Typography>
-                      </div>
-                    )}
-                    <div className="flex justify-between mt-3">
-                      <Button variant="contained" color="primary" size="small"><FaEdit /> Edit</Button>
-                      <Button variant="contained" color="error" size="small" onClick={() => handleDelete(res._id)}><FaTrash /> Delete</Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-          <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Restaurant Name</TableCell>
-                <TableCell>Category</TableCell>
-                <TableCell>Owner</TableCell>
-                <TableCell>Contact</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {sortedRestaurants.map((res) => (
-                <TableRow key={res._id}>
-                  <TableCell onClick={() => handleEdit(res._id, "title", res.title)}>
-                    {editingId === res._id && editField.field === "title" ? (
-                      <TextField value={editField.value} onChange={(e) => setEditField({ ...editField, value: e.target.value })} onBlur={() => handleUpdate(res._id)} autoFocus size="small" />
-                    ) : (
-                      res.title
-                    )}
-                  </TableCell>
-                  <TableCell onClick={() => handleEdit(res._id, "category", res.category)}>
-                    {editingId === res._id && editField.field === "category" ? (
-                      <TextField value={editField.value} onChange={(e) => setEditField({ ...editField, value: e.target.value })} onBlur={() => handleUpdate(res._id)} autoFocus size="small" />
-                    ) : (
-                      res.category
-                    )}
-                  </TableCell>
-                  <TableCell>{res.ownerName}</TableCell>
-                  <TableCell onClick={() => handleEdit(res._id, "contactNumber", res.contactNumber)}>
-                    {editingId === res._id && editField.field === "contactNumber" ? (
-                      <TextField value={editField.value} onChange={(e) => setEditField({ ...editField, value: e.target.value })} onBlur={() => handleUpdate(res._id)} autoFocus size="small" />
-                    ) : (
-                      res.contactNumber
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="contained" color="error" size="small" onClick={() => handleDelete(res._id)}><FaTrash /> Delete</Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        )}
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
+              {error}
+            </Alert>
+          )}
+
+          {!loading && !error && (
+            viewMode === "grid" ? (
+              <Box sx={{ 
+                display: 'grid', 
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' },
+                gap: 3 
+              }}>
+                {sortedRestaurants.map((res) => (
+                  <motion.div 
+                    key={res.id}
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                      <Box sx={{ position: 'relative', height: 160 }}>
+                        <Avatar
+                          src={res.imageURL || "https://placehold.co/300x200"}
+                          alt={res.title}
+                          variant="rounded"
+                          sx={{ width: '100%', height: '100%' }}
+                        />
+                        <Box sx={{ position: 'absolute', top: 8, right: 8 }}>
+                          {getStatusChip(res.active)}
+                        </Box>
+                      </Box>
+                      <CardContent sx={{ flexGrow: 1 }}>
+                        <Typography variant="h6" fontWeight="bold" gutterBottom>
+                          {res.title}
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                          <CategoryIcon color="action" sx={{ mr: 1, fontSize: 18 }} />
+                          <Typography variant="body2" color="text.secondary">
+                            {res.category || "No category"}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <PersonIcon color="action" sx={{ mr: 1, fontSize: 18 }} />
+                          <Typography variant="body2" color="text.secondary">
+                            {res.ownerName || "Unknown"}
+                          </Typography>
+                        </Box>
+                      </CardContent>
+                      <Box sx={{ p: 2 }}>
+                        <Button
+                          fullWidth
+                          variant="outlined"
+                          endIcon={<ExpandMoreIcon sx={{ 
+                            transform: expanded === res.id ? 'rotate(180deg)' : 'none',
+                            transition: 'transform 0.3s'
+                          }} />}
+                          onClick={() => setExpanded(expanded === res.id ? null : res.id)}
+                        >
+                          {expanded === res.id ? "Hide Details" : "Show More"}
+                        </Button>
+                        <Collapse in={expanded === res.id}>
+                          <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #eee' }}>
+                            <DetailItem icon={<PhoneIcon />} text={res.contactNumber || "N/A"} />
+                            <DetailItem icon={<ScheduleIcon />} text={res.timings || "No timings"} />
+                            <DetailItem icon={<LocationIcon />} text={res.address || "No address"} />
+                            {/* <DetailItem icon={<OfferIcon />} text={res.offers?.length ? res.offers.join(", ") : "No offers"} />
+                            <DetailItem 
+                              icon={<StarIcon />} 
+                              text={res.reviews?.length ? `${res.reviews.length} reviews` : "No reviews"} 
+                            /> */}
+                          </Box>
+                        </Collapse>
+                        <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                          <Button
+                            fullWidth
+                            variant="contained"
+                            startIcon={<EditIcon />}
+                            size="small"
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            fullWidth
+                            variant="outlined"
+                            color="error"
+                            startIcon={<DeleteIcon />}
+                            size="small"
+                            onClick={() => handleDelete(res.id)}
+                          >
+                            Delete
+                          </Button>
+                        </Box>
+                      </Box>
+                    </Card>
+                  </motion.div>
+                ))}
+              </Box>
+            ) : (
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Restaurant</TableCell>
+                      <TableCell>Category</TableCell>
+                      <TableCell>Owner</TableCell>
+                      <TableCell>Contact</TableCell>
+                      <TableCell>Status</TableCell>
+                      <TableCell>Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {sortedRestaurants.map((res) => (
+                      <TableRow key={res.id}>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Avatar 
+                              src={res.imageURL || "https://placehold.co/40"} 
+                              sx={{ width: 40, height: 40, mr: 2 }}
+                            />
+                            {editingId === res.id && editField.field === "title" ? (
+                              <TextField
+                                value={editField.value}
+                                onChange={(e) => setEditField({ ...editField, value: e.target.value })}
+                                size="small"
+                                fullWidth
+                                autoFocus
+                                InputProps={{
+                                  endAdornment: (
+                                    <>
+                                      <IconButton size="small" onClick={() => handleUpdate(res.id)}>
+                                        <CheckIcon fontSize="small" color="success" />
+                                      </IconButton>
+                                      <IconButton size="small" onClick={handleCancelEdit}>
+                                        <CloseIcon fontSize="small" color="error" />
+                                      </IconButton>
+                                    </>
+                                  )
+                                }}
+                              />
+                            ) : (
+                              <Typography 
+                                onClick={() => handleEdit(res.id, "title", res.title)}
+                                sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+                              >
+                                {res.title}
+                              </Typography>
+                            )}
+                          </Box>
+                        </TableCell>
+                        <TableCell onClick={() => handleEdit(res.id, "category", res.category)}>
+                          {editingId === res.id && editField.field === "category" ? (
+                            <TextField
+                              value={editField.value}
+                              onChange={(e) => setEditField({ ...editField, value: e.target.value })}
+                              size="small"
+                              fullWidth
+                              autoFocus
+                              InputProps={{
+                                endAdornment: (
+                                  <>
+                                    <IconButton size="small" onClick={() => handleUpdate(res.id)}>
+                                      <CheckIcon fontSize="small" color="success" />
+                                    </IconButton>
+                                    <IconButton size="small" onClick={handleCancelEdit}>
+                                      <CloseIcon fontSize="small" color="error" />
+                                    </IconButton>
+                                  </>
+                                )
+                              }}
+                            />
+                          ) : (
+                            <Typography sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>
+                              {res.category}
+                            </Typography>
+                          )}
+                        </TableCell>
+                        <TableCell>{res.ownerName}</TableCell>
+                        <TableCell onClick={() => handleEdit(res.id, "contactNumber", res.contactNumber)}>
+                          {editingId === res.id && editField.field === "contactNumber" ? (
+                            <TextField
+                              value={editField.value}
+                              onChange={(e) => setEditField({ ...editField, value: e.target.value })}
+                              size="small"
+                              fullWidth
+                              autoFocus
+                              InputProps={{
+                                endAdornment: (
+                                  <>
+                                    <IconButton size="small" onClick={() => handleUpdate(res.id)}>
+                                      <CheckIcon fontSize="small" color="success" />
+                                    </IconButton>
+                                    <IconButton size="small" onClick={handleCancelEdit}>
+                                      <CloseIcon fontSize="small" color="error" />
+                                    </IconButton>
+                                  </>
+                                )
+                              }}
+                            />
+                          ) : (
+                            <Typography sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>
+                              {res.contactNumber || "N/A"}
+                            </Typography>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {getStatusChip(res.active)}
+                        </TableCell>
+                        <TableCell>
+                          <IconButton color="primary">
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton color="error" onClick={() => handleDelete(res.id)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )
+          )}
+
+          {!loading && !error && restaurants.length === 0 && (
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              height: 200,
+              flexDirection: 'column',
+              color: 'text.secondary'
+            }}>
+              <Typography variant="h6" gutterBottom>
+                No restaurants found
+              </Typography>
+              <Typography variant="body2">
+                Try adjusting your search or filters
+              </Typography>
+            </Box>
+          )}
+        </Paper>
       </Box>
-    </div>
+    </Box>
+  );
+}
+
+function DetailItem({ icon, text }) {
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+      <Box sx={{ mr: 1, color: 'text.secondary' }}>
+        {icon}
+      </Box>
+      <Typography variant="body2" color="text.secondary">
+        {text}
+      </Typography>
+    </Box>
   );
 }
