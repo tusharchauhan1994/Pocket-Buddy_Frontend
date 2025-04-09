@@ -76,6 +76,7 @@ export const UserNavbar = ({ setSearchQuery }) => {
     { path: "/user/offers", label: "Offers", icon: <BiGift /> },
     { path: "/user/MyRequests", label: "Requests", icon: <BiListCheck /> },
     { path: "/user/restaurants", label: "Restaurants", icon: <BiRestaurant /> },
+    { path: "/subscriptionPlans", label: "SubscriptionPlans", icon: <BiRestaurant /> },
     { path: "/user/review", label: "Reviews", icon: <BiStar /> },
   ];
 

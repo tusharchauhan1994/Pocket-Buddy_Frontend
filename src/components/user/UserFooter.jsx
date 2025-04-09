@@ -1,8 +1,8 @@
 import React from "react";
-import { 
-  FaFacebook, 
-  FaTwitter, 
-  FaInstagram, 
+import {
+  FaFacebook,
+  FaTwitter,
+  FaInstagram,
   FaLinkedin,
   FaHome,
   FaInfoCircle,
@@ -12,29 +12,49 @@ import {
   FaStore,
   FaEnvelope,
   FaPhone,
-  FaShareAlt
+  FaShareAlt,
 } from "react-icons/fa";
 
 export const UserFooter = () => {
   const currentYear = new Date().getFullYear();
-  
+
   const socialLinks = [
-    { icon: <FaFacebook />, url: "https://facebook.com/pocketbuddy", label: "Facebook" },
-    { icon: <FaTwitter />, url: "https://twitter.com/pocketbuddy", label: "Twitter" },
-    { icon: <FaInstagram />, url: "https://instagram.com/pocketbuddy", label: "Instagram" },
-    { icon: <FaLinkedin />, url: "https://linkedin.com/company/pocketbuddy", label: "LinkedIn" }
+    {
+      icon: <FaFacebook />,
+      url: "https://facebook.com/pocketbuddy",
+      label: "Facebook",
+    },
+    {
+      icon: <FaTwitter />,
+      url: "https://twitter.com/pocketbuddy",
+      label: "Twitter",
+    },
+    {
+      icon: <FaInstagram />,
+      url: "https://instagram.com/pocketbuddy",
+      label: "Instagram",
+    },
+    {
+      icon: <FaLinkedin />,
+      url: "https://linkedin.com/company/pocketbuddy",
+      label: "LinkedIn",
+    },
   ];
 
   const quickLinks = [
     { icon: <FaHome />, text: "Home", url: "/" },
-    { icon: <FaInfoCircle />, text: "About Us", url: "/about" },
+    { icon: <FaInfoCircle />, text: "About Us", url: "/aboutUs" },
     { icon: <FaTags />, text: "Offers", url: "/offers" },
-    { icon: <FaUtensils />, text: "Restaurants", url: "/restaurants" }
+    { icon: <FaUtensils />, text: "Restaurants", url: "/restaurants" },
   ];
 
   const featureLinks = [
     { icon: <FaUserCog />, text: "User Dashboard", url: "/dashboard" },
-    { icon: <FaStore />, text: "Restaurant Panel", url: "/restaurant-dashboard" }
+    {
+      icon: <FaStore />,
+      text: "Restaurant Panel",
+      url: "/restaurant-dashboard",
+    },
   ];
 
   return (
@@ -43,9 +63,12 @@ export const UserFooter = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand Section */}
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-brightColor">Pocket Buddy</h2>
+            <h2 className="text-2xl font-bold text-brightColor">
+              Pocket Buddy
+            </h2>
             <p className="text-gray-300">
-              Discover exclusive restaurant deals and manage your favorite places, all in one app!
+              Discover exclusive restaurant deals and manage your favorite
+              places, all in one app!
             </p>
             <div className="flex space-x-4 pt-2">
               {socialLinks.map((social, index) => (
@@ -144,16 +167,28 @@ export const UserFooter = () => {
         <div className="text-center text-gray-400">
           <p>
             © {currentYear} Developed by{" "}
-            <span className="text-brightColor font-medium">Pocket Buddy Team</span> | All rights reserved
+            <span className="text-brightColor font-medium">
+              Pocket Buddy Team
+            </span>{" "}
+            | All rights reserved
           </p>
           <div className="flex justify-center space-x-4 mt-2 text-sm">
-            <a href="/privacy" className="hover:text-brightColor transition-colors">
+            <a
+              href="/privacy"
+              className="hover:text-brightColor transition-colors"
+            >
               Privacy Policy
             </a>
-            <a href="/terms" className="hover:text-brightColor transition-colors">
+            <a
+              href="/terms"
+              className="hover:text-brightColor transition-colors"
+            >
               Terms of Service
             </a>
-            <a href="/cookies" className="hover:text-brightColor transition-colors">
+            <a
+              href="/cookies"
+              className="hover:text-brightColor transition-colors"
+            >
               Cookie Policy
             </a>
           </div>

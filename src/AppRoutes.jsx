@@ -45,6 +45,7 @@ import AdminManageOffers from "./components/admin/AdminManageOffers";
 import GuestOffers from "./components/guest/GuestOffers";
 import { GuestRestaurant } from "./components/guest/GuestRestaurant";
 import { GuestRestaurantOffersPage } from "./components/guest/GuestRestaurantOffersPage";
+import SubscriptionPlans from "./components/user/SubscriptionPlans";
 
 const AppRoutes = () => {
   return (
@@ -56,6 +57,8 @@ const AppRoutes = () => {
       <Route path="/restaurant/:id/offers" element={<GuestRestaurantOffersPage />} />
       <Route path="/review" element={<Review />} />
       <Route path="*" element={<NotFound />} />
+      <Route path="/aboutUs" element={<UserAbout/>}/>
+      <Route path="/subscriptionPlans" element={<SubscriptionPlans/>}/>
 
       {/* Authentication */}
       <Route path="/login" element={<Login />} />

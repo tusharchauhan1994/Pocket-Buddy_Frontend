@@ -7,7 +7,7 @@ const Footer = () => {
 
   const quickLinks = [
     { name: "Home", path: "/" },
-    { name: "About Us", path: "/about" },
+    { name: "About Us", path: "/aboutUs" },
     { name: "Offers", path: "/offers" },
     { name: "Restaurants", path: "/restaurants" },
   ];
@@ -20,9 +20,18 @@ const Footer = () => {
 
   const socialMedia = [
     { icon: <BsFacebook size={20} />, url: "https://facebook.com/pocketbuddy" },
-    { icon: <RiTwitterXFill size={20} />, url: "https://twitter.com/pocketbuddy" },
-    { icon: <BsInstagram size={20} />, url: "https://instagram.com/pocketbuddy" },
-    { icon: <BsLinkedin size={20} />, url: "https://linkedin.com/company/pocketbuddy" },
+    {
+      icon: <RiTwitterXFill size={20} />,
+      url: "https://twitter.com/pocketbuddy",
+    },
+    {
+      icon: <BsInstagram size={20} />,
+      url: "https://instagram.com/pocketbuddy",
+    },
+    {
+      icon: <BsLinkedin size={20} />,
+      url: "https://linkedin.com/company/pocketbuddy",
+    },
   ];
 
   return (
@@ -33,7 +42,8 @@ const Footer = () => {
           <div className="space-y-4">
             <h2 className="font-semibold text-2xl">Pocket Buddy</h2>
             <p className="text-gray-300 text-sm">
-              Discover exclusive restaurant deals and manage your favorite places, all in one app!
+              Discover exclusive restaurant deals and manage your favorite
+              places, all in one app!
             </p>
             <div className="flex space-x-4 pt-2">
               {socialMedia.map((social, index) => (
@@ -43,7 +53,7 @@ const Footer = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-300 hover:text-brightColor transition-colors duration-300"
-                  aria-label={social.url.split('.')[1]}
+                  aria-label={social.url.split(".")[1]}
                 >
                   {social.icon}
                 </a>
@@ -112,16 +122,28 @@ const Footer = () => {
         <div className="text-center text-gray-400 text-sm">
           <p>
             © {currentYear} Developed by{" "}
-            <span className="text-brightColor font-medium">Pocket Buddy Team</span> | All rights reserved
+            <span className="text-brightColor font-medium">
+              Pocket Buddy Team
+            </span>{" "}
+            | All rights reserved
           </p>
           <div className="flex justify-center space-x-4 mt-2">
-            <a href="/privacy-policy" className="hover:text-brightColor transition-colors">
+            <a
+              href="/privacy-policy"
+              className="hover:text-brightColor transition-colors"
+            >
               Privacy Policy
             </a>
-            <a href="/terms" className="hover:text-brightColor transition-colors">
+            <a
+              href="/terms"
+              className="hover:text-brightColor transition-colors"
+            >
               Terms of Service
             </a>
-            <a href="/cookies" className="hover:text-brightColor transition-colors">
+            <a
+              href="/cookies"
+              className="hover:text-brightColor transition-colors"
+            >
               Cookie Policy
             </a>
           </div>
