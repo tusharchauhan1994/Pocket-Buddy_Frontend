@@ -21,6 +21,7 @@ import {
   Notifications,
   Assessment,
 } from "@mui/icons-material";
+import AdminSubscription from "./AdminSubscription";
 
 export const AdminSidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -45,7 +46,7 @@ export const AdminSidebar = () => {
     { path: "/admin/restaurants", label: "Manage Restaurants", icon: <Store /> },
     { path: "/admin/restaurants2", label: "Manage Restaurants2", icon: <Store /> },
     { path: "/admin/offers", label: "Manage Offers", icon: <LocalOffer /> },
-    { path: "/admin/reports", label: "Reports", icon: <Assessment /> },
+    { path: "/admin/subscription", label: "Subscription", icon: <Assessment /> },
     { path: "/admin/notifications", label: "Notifications", icon: <Notifications /> },
     { path: "/admin/settings", label: "Settings", icon: <Settings /> },
   ];

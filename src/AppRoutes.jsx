@@ -47,6 +47,7 @@ import { GuestRestaurant } from "./components/guest/GuestRestaurant";
 import { GuestRestaurantOffersPage } from "./components/guest/GuestRestaurantOffersPage";
 import SubscriptionPlans from "./components/user/SubscriptionPlans";
 import UserProfilePage from "./components/user/UserProfilePage";
+import AdminSubscription from "./components/admin/AdminSubscription";
 
 const AppRoutes = () => {
   return (
@@ -113,6 +114,7 @@ const AppRoutes = () => {
           element={<AdminManageRestaurants2 />}
         />
         <Route path="/admin/Offers" element={<AdminManageOffers />} />
+        <Route path="/admin/subscription" element={<AdminSubscription />} />
 
         {/* Unauthorized Route */}
         <Route path="/unauthorized" element={<Unauthorized />} />
