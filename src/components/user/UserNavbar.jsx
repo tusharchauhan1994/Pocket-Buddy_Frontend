@@ -11,7 +11,11 @@ import {
   BiListCheck,
   BiStar,
 } from "react-icons/bi";
-import { AiOutlineMenu, AiOutlineClose, AiOutlineShoppingCart } from "react-icons/ai";
+import {
+  AiOutlineMenu,
+  AiOutlineClose,
+  AiOutlineShoppingCart,
+} from "react-icons/ai";
 import { FiSearch } from "react-icons/fi";
 import { debounce } from "lodash";
 
@@ -64,8 +68,7 @@ export const UserNavbar = ({ setSearchQuery }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("id");
-    localStorage.removeItem("role");
+    localStorage.clear(); // This removes all key-value pairs
     navigate("/login", { replace: true });
   };
 
@@ -76,7 +79,11 @@ export const UserNavbar = ({ setSearchQuery }) => {
     { path: "/user/offers", label: "Offers", icon: <BiGift /> },
     { path: "/user/MyRequests", label: "Requests", icon: <BiListCheck /> },
     { path: "/user/restaurants", label: "Restaurants", icon: <BiRestaurant /> },
-    { path: "/subscriptionPlans", label: "SubscriptionPlans", icon: <BiRestaurant /> },
+    {
+      path: "/subscriptionPlans",
+      label: "SubscriptionPlans",
+      icon: <BiRestaurant />,
+    },
     { path: "/user/review", label: "Reviews", icon: <BiStar /> },
   ];
 
@@ -176,9 +183,11 @@ export const UserNavbar = ({ setSearchQuery }) => {
                 <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 hover:bg-gray-200">
                   <BiUserCircle size={20} />
                 </div>
-                <BiChevronDown 
-                  size={18} 
-                  className={`transition-transform ${profileDropdownOpen ? "rotate-180" : ""}`} 
+                <BiChevronDown
+                  size={18}
+                  className={`transition-transform ${
+                    profileDropdownOpen ? "rotate-180" : ""
+                  }`}
                 />
               </button>
 
@@ -219,7 +228,9 @@ export const UserNavbar = ({ setSearchQuery }) => {
             <button
               className="p-2 text-gray-700 hover:text-red-500 focus:outline-none"
               aria-label="Search"
-              onClick={() => document.querySelector('.mobile-search-input')?.focus()}
+              onClick={() =>
+                document.querySelector(".mobile-search-input")?.focus()
+              }
             >
               <FiSearch size={20} />
             </button>
