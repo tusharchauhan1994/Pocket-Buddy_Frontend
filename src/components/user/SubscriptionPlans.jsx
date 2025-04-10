@@ -113,26 +113,29 @@ const UserSubscriptionPlans = () => {
 
         order_id: order.id,
         handler: async function (response) {
-          // 4. Verify payment
           const verification = await axios.post("http://localhost:3000/payment/verify-order", {
             razorpay_order_id: response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_signature: response.razorpay_signature,
           });
-          const userId = localStorage.getItem("id");
+        
           if (verification.data.status === "success") {
-            await axios.post("http://localhost:3000/subscription/save", {
-              userId,         // Replace with actual logged-in user's ID
-              planName: plan.name,
-              price: plan.price,
-              duration: plan.duration,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-            });
-          
-            alert("✅ Payment Successful! Subscription saved.");
-          }
-           else {
+            try {
+              const userId = localStorage.getItem("id");
+              await axios.post("http://localhost:3000/subscription/save", {
+                userId,
+                planName: plan.name,
+                price: plan.price,
+                duration: plan.duration,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id
+              });
+              alert("✅ Payment Successful! Subscription saved.");
+            } catch (saveError) {
+              console.error("Subscription save failed:", saveError);
+              alert("Payment succeeded but subscription save failed. Contact support.");
+            }
+          } else {
             alert("❌ Payment verification failed. Please contact support.");
           }
         },
@@ -159,9 +162,6 @@ const UserSubscriptionPlans = () => {
     }
   };
   
-
-
-
   return (
     <>
       <UserNavbar />
