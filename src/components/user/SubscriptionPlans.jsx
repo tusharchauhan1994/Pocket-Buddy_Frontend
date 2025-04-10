@@ -261,7 +261,7 @@ const UserSubscriptionPlans = () => {
               How Much You'll Save
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center mb-6">
-              <div className="bg-gray-100 p-4 rounded-lg">
+              <div className="bg-gray-100 p-4 border rounded-lg">
                 <p className="text-gray-600">Monthly</p>
                 <p className="text-xl font-bold">₹200/mo</p>
                 <p className="text-sm text-gray-500">₹2400/year</p>

@@ -46,6 +46,7 @@ import GuestOffers from "./components/guest/GuestOffers";
 import { GuestRestaurant } from "./components/guest/GuestRestaurant";
 import { GuestRestaurantOffersPage } from "./components/guest/GuestRestaurantOffersPage";
 import SubscriptionPlans from "./components/user/SubscriptionPlans";
+import UserProfilePage from "./components/user/UserProfilePage";
 
 const AppRoutes = () => {
   return (
@@ -70,6 +71,7 @@ const AppRoutes = () => {
       {/* Protected Routes */}
       <Route element={<PrivateRoutes />}>
         {/* User Routes */}
+        <Route path="/user/profile" element={<UserProfilePage />} />
         <Route path="/user/dashboard" element={<UserDashboard />} />
         <Route path="/user/MyRequests" element={<UserRequests />} />
         <Route path="/user/offers" element={<UserOffers />} />

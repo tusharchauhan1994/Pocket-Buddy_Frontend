@@ -81,11 +81,11 @@ export const UserNavbar = ({ setSearchQuery }) => {
   ];
 
   const profileLinks = [
-    {
-      path: "/user/favorites/offers",
-      label: "Saved Offers",
-      icon: <BiHeart className="text-red-500" />,
-    },
+    // {
+    //   path: "/user/favorites/offers",
+    //   label: "Saved Offers",
+    //   icon: <BiHeart className="text-red-500" />,
+    // },
     {
       path: "/user/profile",
       label: "Profile",
