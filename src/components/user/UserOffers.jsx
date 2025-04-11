@@ -10,14 +10,13 @@ export const UserOffers = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredOffers, setFilteredOffers] = useState([]);
+  const [showExpired, setShowExpired] = useState(false);
 
-  // Memoized fetch function
   const fetchOffers = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get("http://localhost:3000/offer");
 
-      // Handle different response formats more robustly
       let offersData = [];
       if (Array.isArray(response.data)) {
         offersData = response.data;
@@ -27,13 +26,12 @@ export const UserOffers = () => {
         throw new Error("Invalid data format received from API");
       }
 
-      // Filter out invalid offers
       const validOffers = offersData.filter(
         (offer) => offer._id && offer.title && offer.description
       );
 
       setOffers(validOffers);
-      setFilteredOffers(validOffers); // Initialize filtered offers
+      setFilteredOffers(validOffers.filter(offer => offer.status === "Active"));
     } catch (err) {
       console.error("Error fetching offers:", err);
       setError(
@@ -49,31 +47,27 @@ export const UserOffers = () => {
     fetchOffers();
   }, [fetchOffers]);
 
-  // Debounced search filter
   useEffect(() => {
     const timer = setTimeout(() => {
+      const baseOffers = showExpired
+        ? offers.filter(o => o.status === "Inactive")
+        : offers.filter(o => o.status === "Active");
+
       if (searchQuery.trim() === "") {
-        setFilteredOffers(offers);
+        setFilteredOffers(baseOffers);
       } else {
-        const filtered = offers.filter(
+        const filtered = baseOffers.filter(
           (offer) =>
             offer.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            offer.description
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase()) ||
-            (offer.tags &&
-              offer.tags.some((tag) =>
-                tag.toLowerCase().includes(searchQuery.toLowerCase())
-              ))
+            offer.description.toLowerCase().includes(searchQuery.toLowerCase())
         );
         setFilteredOffers(filtered);
       }
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, offers]);
+  }, [searchQuery, offers, showExpired]);
 
-  // Format offer discount text
   const formatDiscountText = (offer) => {
     switch (offer.offer_type) {
       case "Flat Discount":
@@ -87,7 +81,6 @@ export const UserOffers = () => {
     }
   };
 
-  // Render loading skeleton
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen mt-16">
@@ -145,24 +138,36 @@ export const UserOffers = () => {
       <section className="px-5 lg:px-32 py-10">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <h2 className="text-3xl font-semibold mb-3 md:mb-0">
-            Exclusive Offers
+            {showExpired ? "Expired Offers" : "Active Offers"}
           </h2>
-          <div className="relative w-full md:w-64">
-            <input
-              type="text"
-              placeholder="Search offers..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
-              >
-                ✕
-              </button>
-            )}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowExpired(!showExpired)}
+              className={`px-4 py-2 rounded-lg ${
+                showExpired
+                  ? "bg-gray-200 text-gray-800"
+                  : "bg-blue-500 text-white"
+              }`}
+            >
+              {showExpired ? "Show Active" : "Show Expired"}
+            </button>
+            <div className="relative w-full md:w-64">
+              <input
+                type="text"
+                placeholder={`Search ${showExpired ? "expired" : "active"} offers...`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -171,7 +176,9 @@ export const UserOffers = () => {
             {filteredOffers.map((offer) => (
               <div
                 key={offer._id}
-                className="border rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+                className={`border rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 ${
+                  offer.status === "Inactive" ? "opacity-70" : ""
+                }`}
               >
                 <Link to={`/offer/${offer._id}`} className="block">
                   <div className="relative w-full h-48 overflow-hidden">
@@ -199,16 +206,27 @@ export const UserOffers = () => {
                     <span className="text-red-500 font-bold">
                       {formatDiscountText(offer)}
                     </span>
-                    <span className="text-gray-500 text-sm">
-                      Valid Until:{" "}
-                      {new Date(offer.valid_to).toLocaleDateString("en-GB")}
+                    <span
+                      className={`text-sm ${
+                        offer.status === "Inactive"
+                          ? "text-red-500"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {offer.status === "Inactive"
+                        ? "Expired"
+                        : `Valid Until: ${new Date(offer.valid_to).toLocaleDateString(
+                            "en-GB"
+                          )}`}
                     </span>
                   </div>
-                  <Link to={`/offer/${offer._id}`}>
-                    <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300">
-                      Claim Offer
-                    </button>
-                  </Link>
+                  {offer.status === "Active" && (
+                    <Link to={`/offer/${offer._id}`}>
+                      <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300">
+                        Claim Offer
+                      </button>
+                    </Link>
+                  )}
                 </div>
               </div>
             ))}
@@ -236,14 +254,23 @@ export const UserOffers = () => {
               <p className="mt-1 text-gray-500">
                 {searchQuery
                   ? "No offers match your search criteria."
-                  : "Currently there are no available offers."}
+                  : `Currently there are no ${
+                      showExpired ? "expired" : "active"
+                    } offers.`}
               </p>
-              {searchQuery && (
+              {searchQuery ? (
                 <button
                   onClick={() => setSearchQuery("")}
                   className="mt-4 px-4 py-2 text-blue-500 hover:text-blue-700"
                 >
                   Clear search
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowExpired(!showExpired)}
+                  className="mt-4 px-4 py-2 text-blue-500 hover:text-blue-700"
+                >
+                  View {showExpired ? "Active" : "Expired"} Offers
                 </button>
               )}
             </div>

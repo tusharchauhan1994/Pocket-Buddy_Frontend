@@ -30,7 +30,8 @@ import {
   CalendarToday as CalendarIcon,
   Percent as PercentIcon,
   Description as DescriptionIcon,
-  Title as TitleIcon
+  Title as TitleIcon,
+  Image as ImageIcon
 } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -44,6 +45,7 @@ const AdminManageOffers = () => {
   const [currentOffer, setCurrentOffer] = useState(null);
   const [editMode, setEditMode] = useState(false);
 
+  // Fetch offers data on component mount
   useEffect(() => {
     fetchOffers();
   }, []);
@@ -96,9 +98,11 @@ const AdminManageOffers = () => {
       title: "",
       description: "",
       discount_value: "",
+      offer_type: "percentage",
       valid_from: "",
       valid_to: "",
-      status: "active"
+      status: "active",
+      imageURL: ""
     });
     setEditMode(false);
     setOpenDialog(true);
@@ -125,6 +129,7 @@ const AdminManageOffers = () => {
     }
   };
 
+  // Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     try {
@@ -139,6 +144,23 @@ const AdminManageOffers = () => {
     }
   };
 
+  // Format discount value based on offer type
+  const getDiscountDisplay = (offer) => {
+    switch (offer.offer_type) {
+      case "percentage":
+        return `${offer.discount_value}% OFF`;
+      case "flat":
+        return `₹${offer.discount_value} OFF`;
+      case "bogo":
+        return "Buy One Get One";
+      case "unlimited":
+        return "Unlimited Offer";
+      default:
+        return offer.discount_value;
+    }
+  };
+
+  // Filter offers based on search term
   const filteredOffers = offers.filter(offer => 
     offer.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     offer.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -151,9 +173,21 @@ const AdminManageOffers = () => {
       flex: 1,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar sx={{ bgcolor: 'primary.main', mr: 2, width: 32, height: 32 }}>
-            <TitleIcon fontSize="small" />
-          </Avatar>
+          {params.row.imageURL ? (
+            <Avatar 
+              src={params.row.imageURL} 
+              alt={params.value}
+              sx={{ mr: 2, width: 40, height: 40 }}
+              onError={(e) => {
+                e.target.src = ''; // Clear the erroring image
+                e.target.onerror = null; // Prevent infinite loop
+              }}
+            />
+          ) : (
+            <Avatar sx={{ bgcolor: 'primary.main', mr: 2, width: 40, height: 40 }}>
+              <ImageIcon fontSize="small" />
+            </Avatar>
+          )}
           {params.value}
         </Box>
       )
@@ -175,9 +209,24 @@ const AdminManageOffers = () => {
       flex: 1,
       renderCell: (params) => (
         <Chip
-          icon={<PercentIcon />}
-          label={`${params.value}%`}
+          label={getDiscountDisplay(params.row)}
           color="success"
+          variant="outlined"
+        />
+      )
+    },
+    {
+      field: "offer_type",
+      headerName: "Type",
+      flex: 1,
+      renderCell: (params) => (
+        <Chip
+          label={params.value}
+          color={
+            params.value === "percentage" ? "primary" : 
+            params.value === "flat" ? "secondary" : 
+            params.value === "bogo" ? "warning" : "info"
+          }
           variant="outlined"
         />
       )
@@ -222,14 +271,6 @@ const AdminManageOffers = () => {
       flex: 1,
       renderCell: (params) => (
         <Box>
-          <Tooltip title="Edit">
-            <IconButton 
-              color="primary" 
-              onClick={() => handleEditClick(params.row)}
-            >
-              <EditIcon />
-            </IconButton>
-          </Tooltip>
           <Tooltip title="Delete">
             <IconButton 
               color="error" 
@@ -259,14 +300,7 @@ const AdminManageOffers = () => {
               Manage Offers
             </Typography>
             <Box>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleAddClick}
-                sx={{ mr: 2 }}
-              >
-                Add Offer
-              </Button>
+
               <IconButton onClick={fetchOffers}>
                 <RefreshIcon />
               </IconButton>
@@ -338,77 +372,6 @@ const AdminManageOffers = () => {
           )}
         </Paper>
       </Box>
-
-      {/* Add/Edit Dialog */}
-      <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {editMode ? "Edit Offer" : "Add New Offer"}
-        </DialogTitle>
-        <DialogContent dividers>
-          {currentOffer && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-              <TextField
-                label="Title"
-                fullWidth
-                value={currentOffer.title}
-                onChange={(e) => setCurrentOffer({...currentOffer, title: e.target.value})}
-                margin="normal"
-              />
-              <TextField
-                label="Description"
-                fullWidth
-                multiline
-                rows={3}
-                value={currentOffer.description}
-                onChange={(e) => setCurrentOffer({...currentOffer, description: e.target.value})}
-                margin="normal"
-              />
-              <TextField
-                label="Discount Value (%)"
-                type="number"
-                fullWidth
-                value={currentOffer.discount_value}
-                onChange={(e) => setCurrentOffer({...currentOffer, discount_value: e.target.value})}
-                margin="normal"
-              />
-              <TextField
-                label="Start Date"
-                type="date"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                value={currentOffer.valid_from}
-                onChange={(e) => setCurrentOffer({...currentOffer, valid_from: e.target.value})}
-                margin="normal"
-              />
-              <TextField
-                label="End Date"
-                type="date"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                value={currentOffer.valid_to}
-                onChange={(e) => setCurrentOffer({...currentOffer, valid_to: e.target.value})}
-                margin="normal"
-              />
-              <Select
-                label="Status"
-                fullWidth
-                value={currentOffer.status}
-                onChange={(e) => setCurrentOffer({...currentOffer, status: e.target.value})}
-                margin="dense"
-              >
-                <MenuItem value="active">Active</MenuItem>
-                <MenuItem value="inactive">Inactive</MenuItem>
-              </Select>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDialogClose}>Cancel</Button>
-          <Button onClick={handleSave} variant="contained" color="primary">
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };

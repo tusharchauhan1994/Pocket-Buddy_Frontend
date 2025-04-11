@@ -279,14 +279,7 @@ export default function ManageRestaurants() {
                           </Box>
                         </Collapse>
                         <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
-                          <Button
-                            fullWidth
-                            variant="contained"
-                            startIcon={<EditIcon />}
-                            size="small"
-                          >
-                            Edit
-                          </Button>
+
                           <Button
                             fullWidth
                             variant="outlined"
