@@ -14,6 +14,7 @@ const UserProfilePage = () => {
   const [declinedCount, setDeclinedCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [subscriptionError, setSubscriptionError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,16 +22,16 @@ const UserProfilePage = () => {
       try {
         setLoading(true);
         setError(null);
+        setSubscriptionError(null);
         
         const userId = localStorage.getItem('id');
         if (!userId) {
           throw new Error("User ID is missing from localStorage");
         }
 
-        // Fetch all data in parallel for better performance
-        const [userRes, subRes, requestsRes] = await Promise.all([
+        // Fetch user and requests data in parallel
+        const [userRes, requestsRes] = await Promise.all([
           axios.get(`/user/user/${userId}`),
-          axios.get(`/subscription/user/${userId}`),
           axios.get(`http://localhost:3000/redeem/user/${userId}`)
         ]);
 
@@ -38,15 +39,22 @@ const UserProfilePage = () => {
         const userData = userRes.data.data;
         setUser(userData);
 
-        // Set subscription data - modified to match your API response structure
-        const subscriptionData = subRes.data.data || subRes.data;
-        setSubscription(subscriptionData);
-
         // Calculate request counts
         const requests = requestsRes.data;
         setApprovedCount(requests.filter(r => r.status === "Approved").length);
         setPendingCount(requests.filter(r => r.status === "Pending").length);
         setDeclinedCount(requests.filter(r => r.status === "Rejected").length);
+
+        // Try to fetch subscription data separately
+        try {
+          const subRes = await axios.get(`/subscription/user/${userId}`);
+          const subscriptionData = subRes.data.data || subRes.data;
+          setSubscription(subscriptionData);
+        } catch (subError) {
+          console.log("No subscription found for user");
+          setSubscription(null);
+          setSubscriptionError("No active subscription found");
+        }
 
       } catch (err) {
         console.error("Error loading profile data:", err);
@@ -67,6 +75,7 @@ const UserProfilePage = () => {
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     const options = {
       timeZone: "Asia/Kolkata",
       day: "2-digit",
@@ -165,7 +174,7 @@ const UserProfilePage = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {/* User Info Card */}
+          {/* User Info Card - Always shown */}
           <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
             <div className="flex items-center mb-4">
               <div className="bg-blue-100 p-3 rounded-full mr-4">
@@ -189,7 +198,7 @@ const UserProfilePage = () => {
             </div>
           </div>
 
-          {/* Subscription Info Card */}
+          {/* Subscription Info Card - Conditionally shown */}
           <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
             <div className="flex items-center mb-4">
               <div className="bg-purple-100 p-3 rounded-full mr-4">
@@ -226,8 +235,11 @@ const UserProfilePage = () => {
               </div>
             ) : (
               <div className="text-center py-4">
-                <p className="text-gray-500 italic">No active subscription</p>
-                <button className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <p className="text-gray-500 italic">{subscriptionError || 'No active subscription'}</p>
+                <button 
+                  onClick={() => navigate('/subscription')}
+                  className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
                   Upgrade Now
                 </button>
               </div>

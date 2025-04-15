@@ -27,6 +27,10 @@ export const UserDashboard = () => {
   const [filterType, setFilterType] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [showExpired, setShowExpired] = useState(false);
+  const [subscription, setSubscription] = useState(null);
+
+  const userId = localStorage.getItem("id");
 
   // Save last valid page and check user role
   useEffect(() => {
@@ -62,6 +66,22 @@ export const UserDashboard = () => {
     fetchData();
   }, []);
 
+  // Fetch subscription data
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      if (!userId) return;
+      try {
+        const res = await axios.get(
+          `http://localhost:3000/subscription/user/${userId}`
+        );
+        setSubscription(res.data?.data || res.data);
+      } catch (err) {
+        console.error("Failed to fetch subscription:", err);
+      }
+    };
+    fetchSubscription();
+  }, [userId]);
+
   // Debounced search function
   const debouncedSearch = useCallback(
     debounce((query) => {
@@ -81,9 +101,13 @@ export const UserDashboard = () => {
         filterType === "all" ||
         offer.offer_type?.toLowerCase().includes(filterType.toLowerCase());
 
-      return matchesSearch && matchesFilter;
+      const matchesStatus = showExpired
+        ? offer.status === "Inactive"
+        : offer.status === "Active";
+
+      return matchesSearch && matchesFilter && matchesStatus;
     });
-  }, [offers, searchQuery, filterType]);
+  }, [offers, searchQuery, filterType, showExpired]);
 
   const sortedOffers = useCallback(() => {
     const filtered = filteredOffers();
@@ -107,6 +131,23 @@ export const UserDashboard = () => {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays <= 3;
   }, []);
+
+  const handleSubscriptionRedirect = () => {
+    navigate("/subscriptionPlans");
+  };
+
+  const formatDiscountText = (offer) => {
+    switch (offer.offer_type) {
+      case "Flat Discount":
+        return `₹${offer.discount_value} OFF`;
+      case "Percentage":
+        return `${offer.discount_value}% OFF`;
+      case "Free Item":
+        return `FREE ${offer.free_item || "ITEM"}`;
+      default:
+        return offer.offer_type;
+    }
+  };
 
   // Render offer cards
   const renderOfferCards = useCallback(() => {
@@ -153,20 +194,23 @@ export const UserDashboard = () => {
         <div className="col-span-3 flex flex-col items-center justify-center py-10 text-center">
           <ImSad className="text-4xl text-gray-400 mb-3" />
           <h3 className="text-xl font-medium text-gray-700 mb-2">
-            {searchQuery || filterType !== "all"
+            {searchQuery || filterType !== "all" || showExpired
               ? "No offers match your criteria"
-              : "No offers available"}
+              : showExpired
+              ? "No expired offers available"
+              : "No active offers available"}
           </h3>
           <p className="text-gray-500 max-w-md">
-            {searchQuery || filterType !== "all"
+            {searchQuery || filterType !== "all" || showExpired
               ? "Try adjusting your search or filter to find what you're looking for."
               : "There are currently no offers to display."}
           </p>
-          {(searchQuery || filterType !== "all") && (
+          {(searchQuery || filterType !== "all" || showExpired) && (
             <button
               onClick={() => {
                 setSearchQuery("");
                 setFilterType("all");
+                setShowExpired(false);
               }}
               className="mt-4 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-md"
             >
@@ -180,11 +224,19 @@ export const UserDashboard = () => {
     return currentOffers.map((offer) => (
       <div
         key={offer._id}
-        className="border rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 relative bg-white"
+        className={`border rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 relative bg-white ${
+          offer.status === "Inactive" ? "opacity-70" : ""
+        }`}
       >
-        {isExpiringSoon(offer.valid_to) && (
+        {offer.status === "Active" && isExpiringSoon(offer.valid_to) && (
           <div className="absolute top-2 right-2 bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1 rounded-full text-xs flex items-center shadow-md z-10">
             <FaFire className="mr-1" /> Expiring Soon!
+          </div>
+        )}
+
+        {offer.status === "Inactive" && (
+          <div className="absolute top-2 right-2 bg-gray-500 text-white px-3 py-1 rounded-full text-xs flex items-center shadow-md z-10">
+            Expired
           </div>
         )}
 
@@ -214,11 +266,7 @@ export const UserDashboard = () => {
 
           <div className="flex items-center justify-between mb-3">
             <span className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600">
-              {offer.offer_type === "Flat Discount"
-                ? `₹${offer.discount_value} OFF`
-                : offer.offer_type === "Percentage"
-                ? `${offer.discount_value}% OFF`
-                : offer.offer_type}
+              {formatDiscountText(offer)}
             </span>
 
             <div className="flex items-center text-gray-500 text-sm">
@@ -234,25 +282,41 @@ export const UserDashboard = () => {
           </div>
 
           <div className="flex justify-between items-center">
-            <Link
-              to={`/offer/${offer._id}`}
-              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-md flex-1 text-center"
-            >
-              Claim Offer
-            </Link>
-            <Link
-              to={`/offer/${offer._id}`}
-              className="ml-2 p-2 text-blue-500 hover:text-blue-700 transition-colors"
-              title="More details"
-              aria-label="More details"
-            >
-              <FaInfoCircle size={20} />
-            </Link>
+            {offer.status === "Active" ? (
+              (subscription?.status || "").toLowerCase() === "active" ? (
+                <Link
+                  to={`/offer/${offer._id}`}
+                  className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-md flex-1 text-center"
+                >
+                  Claim Offer
+                </Link>
+              ) : (
+                <button
+                  onClick={handleSubscriptionRedirect}
+                  className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all shadow-md flex-1 text-center"
+                >
+                  Subscribe to Claim
+                </button>
+              )
+            ) : (
+              <div className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg flex-1 text-center cursor-not-allowed">
+                Offer Expired
+              </div>
+            )}
           </div>
         </div>
       </div>
     ));
-  }, [loading, error, sortedOffers, searchQuery, filterType, isExpiringSoon]);
+  }, [
+    loading,
+    error,
+    sortedOffers,
+    searchQuery,
+    filterType,
+    showExpired,
+    isExpiringSoon,
+    subscription,
+  ]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -309,61 +373,74 @@ export const UserDashboard = () => {
               />
             </div>
 
-            {/* Desktop Filters */}
-            <div className="hidden md:flex gap-4">
-              <div className="flex items-center">
-                <label
-                  htmlFor="filter"
-                  className="mr-2 text-gray-600 whitespace-nowrap"
-                >
-                  <FaFilter className="inline mr-1" />
-                  Filter:
-                </label>
-                <select
-                  id="filter"
-                  className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
-                  aria-label="Filter offers by type"
-                >
-                  <option value="all">All Types</option>
-                  <option value="flat">Flat Discount</option>
-                  <option value="percentage">Percentage</option>
-                  <option value="bogo">Buy One Get One</option>
-                </select>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setShowExpired(!showExpired)}
+                className={`px-4 py-2 rounded-lg ${
+                  showExpired
+                    ? "bg-gray-200 text-gray-800"
+                    : "bg-blue-500 text-white"
+                }`}
+              >
+                {showExpired ? "Show Active" : "Show Expired"}
+              </button>
+
+              {/* Desktop Filters */}
+              <div className="hidden md:flex gap-4">
+                <div className="flex items-center">
+                  <label
+                    htmlFor="filter"
+                    className="mr-2 text-gray-600 whitespace-nowrap"
+                  >
+                    <FaFilter className="inline mr-1" />
+                    Filter:
+                  </label>
+                  <select
+                    id="filter"
+                    className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    aria-label="Filter offers by type"
+                  >
+                    <option value="all">All Types</option>
+                    <option value="flat">Flat Discount</option>
+                    <option value="percentage">Percentage</option>
+                    <option value="bogo">Buy One Get One</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center">
+                  <label
+                    htmlFor="sort"
+                    className="mr-2 text-gray-600 whitespace-nowrap"
+                  >
+                    <FaSort className="inline mr-1" />
+                    Sort by:
+                  </label>
+                  <select
+                    id="sort"
+                    className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    aria-label="Sort offers"
+                  >
+                    <option value="newest">Newest</option>
+                    <option value="highest-discount">Highest Discount</option>
+                    <option value="expiring-soon">Expiring Soon</option>
+                  </select>
+                </div>
               </div>
 
-              <div className="flex items-center">
-                <label
-                  htmlFor="sort"
-                  className="mr-2 text-gray-600 whitespace-nowrap"
-                >
-                  <FaSort className="inline mr-1" />
-                  Sort by:
-                </label>
-                <select
-                  id="sort"
-                  className="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  aria-label="Sort offers"
-                >
-                  <option value="newest">Newest</option>
-                  <option value="highest-discount">Highest Discount</option>
-                  <option value="expiring-soon">Expiring Soon</option>
-                </select>
-              </div>
+              {/* Mobile Filter Toggle */}
+              <button
+                className="md:hidden flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all"
+                onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
+                aria-label="Toggle filters"
+              >
+                <FaFilter className="mr-2" />
+                Filters
+              </button>
             </div>
-
-            {/* Mobile Filter Toggle */}
-            <button
-              className="md:hidden flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all"
-              onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-              aria-label="Toggle filters"
-            >
-              <FaFilter className="mr-2" />
-              Filters
-            </button>
           </div>
 
           {/* Mobile Filters Dropdown */}

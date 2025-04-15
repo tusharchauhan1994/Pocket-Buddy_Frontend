@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { UserNavbar } from "./UserNavbar";
 import { UserFooter } from "./UserFooter";
 
@@ -11,27 +11,28 @@ export const UserOffers = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredOffers, setFilteredOffers] = useState([]);
   const [showExpired, setShowExpired] = useState(false);
+  const [subscription, setSubscription] = useState(null);
+  const navigate = useNavigate();
+
+  const userId = localStorage.getItem("id");
 
   const fetchOffers = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get("http://localhost:3000/offer");
 
-      let offersData = [];
-      if (Array.isArray(response.data)) {
-        offersData = response.data;
-      } else if (response.data && Array.isArray(response.data.offers)) {
-        offersData = response.data.offers;
-      } else {
-        throw new Error("Invalid data format received from API");
-      }
+      let offersData = Array.isArray(response.data)
+        ? response.data
+        : response.data?.offers || [];
 
       const validOffers = offersData.filter(
         (offer) => offer._id && offer.title && offer.description
       );
 
       setOffers(validOffers);
-      setFilteredOffers(validOffers.filter(offer => offer.status === "Active"));
+      setFilteredOffers(
+        validOffers.filter((offer) => offer.status === "Active")
+      );
     } catch (err) {
       console.error("Error fetching offers:", err);
       setError(
@@ -43,15 +44,28 @@ export const UserOffers = () => {
     }
   }, []);
 
+  const fetchSubscription = async () => {
+    if (!userId) return;
+    try {
+      const res = await axios.get(
+        `http://localhost:3000/subscription/user/${userId}`
+      );
+      setSubscription(res.data?.data || res.data);
+    } catch (err) {
+      console.error("Failed to fetch subscription:", err);
+    }
+  };
+
   useEffect(() => {
     fetchOffers();
+    fetchSubscription();
   }, [fetchOffers]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       const baseOffers = showExpired
-        ? offers.filter(o => o.status === "Inactive")
-        : offers.filter(o => o.status === "Active");
+        ? offers.filter((o) => o.status === "Inactive")
+        : offers.filter((o) => o.status === "Active");
 
       if (searchQuery.trim() === "") {
         setFilteredOffers(baseOffers);
@@ -79,6 +93,10 @@ export const UserOffers = () => {
       default:
         return offer.offer_type;
     }
+  };
+
+  const handleSubscriptionRedirect = () => {
+    navigate("/subscriptionPlans");
   };
 
   if (loading) {
@@ -154,7 +172,9 @@ export const UserOffers = () => {
             <div className="relative w-full md:w-64">
               <input
                 type="text"
-                placeholder={`Search ${showExpired ? "expired" : "active"} offers...`}
+                placeholder={`Search ${
+                  showExpired ? "expired" : "active"
+                } offers...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -188,11 +208,6 @@ export const UserOffers = () => {
                       className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                       loading="lazy"
                     />
-                    {offer.isNew && (
-                      <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
-                        NEW
-                      </span>
-                    )}
                   </div>
                 </Link>
                 <div className="p-4">
@@ -215,18 +230,26 @@ export const UserOffers = () => {
                     >
                       {offer.status === "Inactive"
                         ? "Expired"
-                        : `Valid Until: ${new Date(offer.valid_to).toLocaleDateString(
-                            "en-GB"
-                          )}`}
+                        : `Valid Until: ${new Date(
+                            offer.valid_to
+                          ).toLocaleDateString("en-GB")}`}
                     </span>
                   </div>
-                  {offer.status === "Active" && (
-                    <Link to={`/offer/${offer._id}`}>
-                      <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300">
-                        Claim Offer
+                  {offer.status === "Active" &&
+                    ((subscription?.status || "").toLowerCase() === "active" ? (
+                      <Link to={`/offer/${offer._id}`}>
+                        <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300">
+                          Claim Offer
+                        </button>
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={handleSubscriptionRedirect}
+                        className="w-full px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-300"
+                      >
+                        Subscribe to Claim
                       </button>
-                    </Link>
-                  )}
+                    ))}
                 </div>
               </div>
             ))}
@@ -234,20 +257,6 @@ export const UserOffers = () => {
         ) : (
           <div className="text-center py-10">
             <div className="max-w-md mx-auto">
-              <svg
-                className="w-16 h-16 mx-auto text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
               <h3 className="mt-3 text-lg font-medium text-gray-700">
                 No offers found
               </h3>
@@ -258,21 +267,6 @@ export const UserOffers = () => {
                       showExpired ? "expired" : "active"
                     } offers.`}
               </p>
-              {searchQuery ? (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="mt-4 px-4 py-2 text-blue-500 hover:text-blue-700"
-                >
-                  Clear search
-                </button>
-              ) : (
-                <button
-                  onClick={() => setShowExpired(!showExpired)}
-                  className="mt-4 px-4 py-2 text-blue-500 hover:text-blue-700"
-                >
-                  View {showExpired ? "Active" : "Expired"} Offers
-                </button>
-              )}
             </div>
           </div>
         )}

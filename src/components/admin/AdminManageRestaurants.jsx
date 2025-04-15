@@ -270,12 +270,12 @@ export const ManageRestaurants = () => {
                         </Typography>
                       )
                     },
-                    { 
-                      field: "status", 
-                      headerName: "Status", 
-                      flex: 0.8,
-                      renderCell: (params) => getStatusChip(params.value)
-                    },
+                    // { 
+                    //   field: "status", 
+                    //   headerName: "Status", 
+                    //   flex: 0.8,
+                    //   renderCell: (params) => getStatusChip(params.value)
+                    // },
                     {
                       field: "imageURL",
                       headerName: "Image",
@@ -295,40 +295,40 @@ export const ManageRestaurants = () => {
                         )
                       ),
                     },
-                    {
-                      field: "actions",
-                      headerName: "Actions",
-                      flex: 1.5,
-                      renderCell: () => (
-                        <Box>
-                          {/* <Button 
-                            variant="outlined" 
-                            size="small" 
-                            startIcon={<VisibilityIcon fontSize="small" />}
-                            sx={{ mr: 1 }}
-                          >
-                            View
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            color="primary"
-                            startIcon={<EditIcon fontSize="small" />}
-                            sx={{ mr: 1 }}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            color="error"
-                            startIcon={<DeleteIcon fontSize="small" />}
-                          >
-                            Delete
-                          </Button> */}
-                        </Box>
-                      ),
-                    },
+                    // {
+                    //   field: "actions",
+                    //   headerName: "Actions",
+                    //   flex: 1.5,
+                    //   renderCell: () => (
+                    //     <Box>
+                    //       {/* <Button 
+                    //         variant="outlined" 
+                    //         size="small" 
+                    //         startIcon={<VisibilityIcon fontSize="small" />}
+                    //         sx={{ mr: 1 }}
+                    //       >
+                    //         View
+                    //       </Button>
+                    //       <Button
+                    //         variant="outlined"
+                    //         size="small"
+                    //         color="primary"
+                    //         startIcon={<EditIcon fontSize="small" />}
+                    //         sx={{ mr: 1 }}
+                    //       >
+                    //         Edit
+                    //       </Button>
+                    //       <Button
+                    //         variant="outlined"
+                    //         size="small"
+                    //         color="error"
+                    //         startIcon={<DeleteIcon fontSize="small" />}
+                    //       >
+                    //         Delete
+                    //       </Button> */}
+                    //     </Box>
+                    //   ),
+                    // },
                   ]}
                   pageSize={5}
                   rowsPerPageOptions={[5, 10]}
