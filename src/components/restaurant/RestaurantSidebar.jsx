@@ -55,8 +55,7 @@ export const RestaurantSidebar = () => {
 
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to log out?")) {
-      localStorage.removeItem("id");
-      localStorage.removeItem("role");
+      localStorage.clear();
       navigate("/login");
     }
   };
