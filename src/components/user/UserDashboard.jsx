@@ -241,7 +241,7 @@ export const UserDashboard = () => {
         )}
 
         <Link to={`/offer/${offer._id}`} className="block">
-          <div className="relative w-full aspect-video overflow-hidden">
+          <div className="relative w-full aspect-square overflow-hidden">
             <img
               src={offer.imageURL || "https://via.placeholder.com/300"}
               alt={offer.title}

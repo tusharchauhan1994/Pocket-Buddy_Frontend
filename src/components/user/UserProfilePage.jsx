@@ -237,7 +237,7 @@ const UserProfilePage = () => {
               <div className="text-center py-4">
                 <p className="text-gray-500 italic">{subscriptionError || 'No active subscription'}</p>
                 <button 
-                  onClick={() => navigate('/subscription')}
+                  onClick={() => navigate('/subscriptionPlans')}
                   className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                 >
                   Upgrade Now
