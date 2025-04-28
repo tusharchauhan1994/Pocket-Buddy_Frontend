@@ -13,9 +13,9 @@ const Footer = () => {
   ];
 
   const features = [
-    { name: "User Dashboard", path: "/dashboard" },
-    { name: "Restaurant Panel", path: "/restaurant-dashboard" },
-    { name: "Deals & Coupons", path: "/deals" },
+    // { name: "User Dashboard", path: "/dashboard" },
+    // { name: "Restaurant Panel", path: "/restaurant-dashboard" },
+    // { name: "Deals & Coupons", path: "/deals" },
   ];
 
   const socialMedia = [
@@ -78,7 +78,7 @@ const Footer = () => {
           </div>
 
           {/* Features */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <h3 className="font-medium text-xl">Features</h3>
             <nav className="space-y-2">
               {features.map((feature, index) => (
@@ -91,7 +91,7 @@ const Footer = () => {
                 </a>
               ))}
             </nav>
-          </div>
+          </div> */}
 
           {/* Contact Section */}
           <div className="space-y-4">

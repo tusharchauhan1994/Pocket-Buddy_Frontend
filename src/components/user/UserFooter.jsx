@@ -104,7 +104,7 @@ export const UserFooter = () => {
           </div>
 
           {/* Features */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <h3 className="text-xl font-semibold">Features</h3>
             <nav className="space-y-3">
               {featureLinks.map((link, index) => (
@@ -118,7 +118,7 @@ export const UserFooter = () => {
                 </a>
               ))}
             </nav>
-          </div>
+          </div> */}
 
           {/* Contact Section */}
           <div className="space-y-4">
