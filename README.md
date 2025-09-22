@@ -1,10 +1,8 @@
-Sure! Here’s the **plain text** you can copy-paste directly.
-
 ---
 
 ### 🟢 **Frontend README** (`pocket-buddy-frontend/README.md`)
 
-````
+````markdown
 # 🍽️ Pocket Buddy – Frontend
 
 Pocket Buddy is a full-stack MERN platform that connects food lovers with the best restaurant deals while giving restaurant owners powerful tools to manage and promote offers.  
@@ -42,13 +40,12 @@ This repository contains the **React + Vite frontend** that delivers a fast, mob
    ```
 
 3. **Environment variables**
+   Create a `.env` file and add:
 
-   * Create a `.env` file and add:
-
-     ```
-     VITE_API_URL=<your-backend-url>
-     VITE_RAZORPAY_KEY=<your-razorpay-key>
-     ```
+   ```
+   VITE_API_URL=<your-backend-url>
+   VITE_RAZORPAY_KEY=<your-razorpay-key>
+   ```
 
 4. **Run the app**
 
@@ -88,49 +85,45 @@ src/
 
 ---
 
-```
+````
 
 ---
 
 ### 🟠 **Backend README** (`pocket-buddy-backend/README.md`)
 
-```
-
+```markdown
 # 🍽️ Pocket Buddy – Backend
 
-This repository hosts the **Node.js + Express backend** for Pocket Buddy.
+This repository hosts the **Node.js + Express backend** for Pocket Buddy.  
 It provides secure APIs, database operations, and integrations for subscriptions, offer management, and redemption flows.
 
 ---
 
 ## ✨ Core Features
-
-* 👥 **Role-Based Access**: Admin, Restaurant Owner, and User.
-* 🎯 **Offer Management**: Create, update, and delete offers with approval workflow.
-* 🔁 **Redemption Flow**: User requests → Owner approves/declines → Redemption recorded.
-* 💳 **Subscriptions & Payments**: Razorpay integration with admin tracking.
-* ☁️ **Image Uploads**: Multer + Cloudinary for restaurant and offer images.
+- 👥 **Role-Based Access**: Admin, Restaurant Owner, and User.
+- 🎯 **Offer Management**: Create, update, and delete offers with approval workflow.
+- 🔁 **Redemption Flow**: User requests → Owner approves/declines → Redemption recorded.
+- 💳 **Subscriptions & Payments**: Razorpay integration with admin tracking.
+- ☁️ **Image Uploads**: Multer + Cloudinary for restaurant and offer images.
 
 ---
 
 ## 🛠️ Tech Stack
-
-* **Node.js + Express.js**
-* **MongoDB (Mongoose)**
-* **Razorpay API** for payments
-* **Cloudinary** for image hosting
-* **JWT Authentication**
+- **Node.js + Express.js**
+- **MongoDB (Mongoose)**
+- **Razorpay API** for payments
+- **Cloudinary** for image hosting
+- **JWT Authentication**
 
 ---
 
 ## ⚙️ Setup & Installation
 
 1. **Clone the repo**
-
    ```bash
    git clone https://github.com/your-org/pocket-buddy-backend.git
    cd pocket-buddy-backend
-   ```
+````
 
 2. **Install dependencies**
 
@@ -189,6 +182,3 @@ server.js
   Special thanks to Grownited P Ltd.
 
 ---
-
-```
-
